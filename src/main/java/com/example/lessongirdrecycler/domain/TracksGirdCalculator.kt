@@ -44,10 +44,13 @@ class TracksGirdCalculator(
         )
     }
 
-    private fun isCellsTransition(currentPosition: Int, turnPoints: List<TurnPoint>): Boolean {
+    private fun isCellsHasTransition(currentPosition: Int, turnPoints: List<TurnPoint>): Boolean {
         if (currentPosition < turnPoints.size) {
             val currentCellCoordinates = cellCoordinates(turnPoints[currentPosition])
             val nextCellCoordinates = cellCoordinates(turnPoints[currentPosition])
+            val differentX = currentCellCoordinates.x - nextCellCoordinates.x
+            val differentY = currentCellCoordinates.y - nextCellCoordinates.y
+            // далее определяем тип перехода: вверх-вниз-вправо-влево
             if (cellCoordinates(turnPoints[currentPosition].equals(cellCoordinates(turnPoints[currentPosition+1]))))
         } else return false
     }
