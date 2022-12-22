@@ -1,6 +1,6 @@
 package com.example.lessongirdrecycler.presentation
 
-import com.example.lessongirdrecycler.domain.TracksGirdCalculator
+import com.example.lessongirdrecycler.domain.coordinates_calculator.TracksGirdCalculator
 import com.example.lessongirdrecycler.models.CellTracks
 import com.example.lessongirdrecycler.models.Track
 

@@ -1,0 +1,9 @@
+GPS Location (latitude: Int, longitude: Int) // (latitude: Double, longitude: Double, ...)
+    v
+....................... // transition into Data layer
+    v
+GlobalLocation (latitude: Int, longitude: Int)// (latitude: Double, longitude: Double)
+    v
+LocalLocation (latitude: Int, longitude: Int)// (latitude: Long, longitude: Long) // coordinates regarding referencePoint
+    v
+CellLocation (latitude: Int, longitude: Int) // coordinates just inside single cell

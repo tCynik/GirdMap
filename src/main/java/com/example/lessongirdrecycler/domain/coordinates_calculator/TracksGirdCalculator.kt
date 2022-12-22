@@ -1,16 +1,20 @@
-package com.example.lessongirdrecycler.domain
+package com.example.lessongirdrecycler.domain.coordinates_calculator
 
-import com.example.lessongirdrecycler.domain.models.Cell
+import com.example.lessongirdrecycler.domain.models.cell.Cell
 import com.example.lessongirdrecycler.domain.models.CellNumber
-import com.example.lessongirdrecycler.domain.models.GirdTurnPoint
-import com.example.lessongirdrecycler.models.CellTracks
+import com.example.lessongirdrecycler.domain.models.local.LocalLocation
 import com.example.lessongirdrecycler.models.Track
 import com.example.lessongirdrecycler.models.TurnPoint
 
+/**
+ * логика такая:
+ * Координаты, с которыми работаем: глобальные, кординаты карты, кординаты квадрата
+ * 1. есть начало координат, относительно которого из лобальных координат получаем кординаты карты
+ *
+ */
 class TracksGirdCalculator(
     val cellSize: Int // размер клетки в базовых единицах глобальной системы координат
     ) {
-
 
     fun splitTrackToCells(trackId: Int, track: Track): Cell {
         // каждой координате определяем ячейку, в которой точка, и координаты точки внутри ячейки
@@ -37,8 +41,8 @@ class TracksGirdCalculator(
         return coordinatesInsideCell(globalCoordinates, cellNumber)
     }
 
-    private fun coordinatesInsideCell (globalCoordinates: TurnPoint, cellNumber: CellNumber): GirdTurnPoint {
-        return GirdTurnPoint(
+    private fun coordinatesInsideCell (globalCoordinates: TurnPoint, cellNumber: CellNumber): LocalLocation {
+        return LocalLocation(
             x = globalCoordinates.longitude - (cellNumber.x*cellSize),
             y = globalCoordinates.latitude - (cellNumber.y*cellSize)
         )
@@ -51,7 +55,8 @@ class TracksGirdCalculator(
             val differentX = currentCellCoordinates.x - nextCellCoordinates.x
             val differentY = currentCellCoordinates.y - nextCellCoordinates.y
             // далее определяем тип перехода: вверх-вниз-вправо-влево
-            if (cellCoordinates(turnPoints[currentPosition].equals(cellCoordinates(turnPoints[currentPosition+1]))))
+            if (cellCoordinates(turnPoints[currentPosition].
+                equals(cellCoordinates(turnPoints[currentPosition+1])
         } else return false
     }
 }

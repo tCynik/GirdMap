@@ -1,4 +1,6 @@
 package com.example.lessongirdrecycler.domain.models
 
-data class GirdTrack(val id: Int, val turnPoints: List<GirdTurnPoint>) {
+import com.example.lessongirdrecycler.domain.models.local.LocalLocation
+
+data class GirdTrack(val id: Int, val turnPoints: List<LocalLocation>) {
 }
