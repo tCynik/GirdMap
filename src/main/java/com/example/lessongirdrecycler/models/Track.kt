@@ -1,19 +1,21 @@
 package com.example.lessongirdrecycler.models
 
-data class Track(val name: String, val turnPoints: MutableList<TurnPoint> ) {
-    fun addTurnPoint(nextTurnPoint: TurnPoint) {
+import com.example.lessongirdrecycler.domain.models.global.GlobalTurnPoint
+
+data class Track(val id: Int, val name: String, val turnPoints: MutableList<GlobalTurnPoint> ) {
+    fun addTurnPoint(nextTurnPoint: GlobalTurnPoint) {
         turnPoints.add(nextTurnPoint)
     }
 
-    fun endBottomCoordinates(): TurnPoint {
+    fun endBottomCoordinates(): GlobalTurnPoint {
         val maxSizeX = maxX()
         val maxSizeY = maxY()
-        return TurnPoint(latitude = maxSizeY, longitude = maxSizeX)
+        return GlobalTurnPoint(latitude = maxSizeY, longitude = maxSizeX)
     }
-    fun startTopCoordinates(): TurnPoint {
+    fun startTopCoordinates(): GlobalTurnPoint {
         val minSizeX = maxX()
         val minSizeY = maxY()
-        return TurnPoint(latitude = minSizeY, longitude = minSizeX)
+        return GlobalTurnPoint(latitude = minSizeY, longitude = minSizeX)
     }
 
     private fun maxX(): Int {

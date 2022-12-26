@@ -1,13 +1,13 @@
 package com.example.lessongirdrecycler.domain.coordinates_calculator.gird_transition
 
-import com.example.lessongirdrecycler.domain.models.CellNumber
+import com.example.lessongirdrecycler.domain.models.cell.CellCoordinates
 
 class TransitionManager {
     //fun whichTransition
 }
 
 class TransitionDetector {
-    fun execute(currentCell: CellNumber, nextCell: CellNumber) : EnumTransitionTo {
+    fun execute(currentCell: CellCoordinates, nextCell: CellCoordinates) : EnumTransitionTo {
         val deltaX = currentCell.x - nextCell.x
         val deltaY = currentCell.y - nextCell.y
 

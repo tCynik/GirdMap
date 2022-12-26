@@ -1,14 +1,16 @@
 package com.example.lessongirdrecycler.domain.coordinates_calculator
 
-import com.example.lessongirdrecycler.domain.models.GirdTrack
 import com.example.lessongirdrecycler.domain.models.cell.CellCoordinates
-import com.example.lessongirdrecycler.domain.models.local.LocalLocation
-import java.util.ArrayList
+import com.example.lessongirdrecycler.domain.models.cell.CellTrack
+import com.example.lessongirdrecycler.domain.models.cell.CellLocation
+import com.example.lessongirdrecycler.models.Track
 
 abstract class CalculatorStructure {
-    fun distributeTrackToCells(track: Track): Map<CellCoordinates, GirdTrack> {
+    fun distributeTrackToCells(track: Track): Map<CellCoordinates, CellTrack> {
+        for (turnPoint in track.turnPoints) {
 
+        }
     }
 
-    abstract fun pointToCellNumber(localCoordinates: LocalLocation): 
+    fun pointToCellNumber(localCoordinates: CellLocation):
 }
