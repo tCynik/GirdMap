@@ -1,21 +1,16 @@
 package com.example.lessongirdrecycler.domain.models.cell
 
 class SplittedByCellsTrack(val trackId: Int) {
-    var cellData: MutableMap<CellCoordinates, CellTrack>? = null,
-    var currentCell: CellCoordinates? = null
+    private var cellData: MutableMap<CoordinatesOfCell, CellTrack> = mutableMapOf()
 
-    fun cell (cellCoordinates: CellCoordinates) {
-        currentCell = cellCoordinates
+    fun addLocation (coordinatesOfCell: CoordinatesOfCell, cellLocation: CellLocation) {
+        if (!cellData.containsKey(coordinatesOfCell)) {
+            cellData.put(coordinatesOfCell, CellTrack(trackId, cellLocation))
+            cellData[coordinatesOfCell]!!.addLocation(cellLocation)
+        }
     }
 
-    fun addLocation (cellLocation: CellLocation) {
-        if (cellData == null) {
-            cellData = mutableMapOf()//MutableMap<>(currentCell, CellTrack(id = trackId, turnPoints = mutableListOf()))
-        }
-
-        if (cellData != null) {
-            if (cellData.containsKey(currentCell))
-        }
-        cellData[]
+    fun getCellData(): MutableMap<CoordinatesOfCell, CellTrack> {
+        return cellData
     }
 }

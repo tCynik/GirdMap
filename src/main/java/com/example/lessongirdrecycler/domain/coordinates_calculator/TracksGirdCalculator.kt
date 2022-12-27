@@ -1,7 +1,9 @@
 package com.example.lessongirdrecycler.domain.coordinates_calculator
 
+import com.example.lessongirdrecycler.domain.coordinates_calculator.gird_transition.TransitionManager
+import com.example.lessongirdrecycler.domain.coordinates_calculator.gird_transition.TransitionTo
 import com.example.lessongirdrecycler.domain.models.cell.SplittedByCellsTrack
-import com.example.lessongirdrecycler.domain.models.cell.CellCoordinates
+import com.example.lessongirdrecycler.domain.models.cell.CoordinatesOfCell
 import com.example.lessongirdrecycler.domain.models.cell.CellTrack
 import com.example.lessongirdrecycler.domain.models.cell.CellLocation
 import com.example.lessongirdrecycler.models.Track
@@ -23,18 +25,52 @@ class TracksGirdCalculator(
         // каждой координате определяем ячейку, в которой точка, и координаты точки внутри ячейки
         // Если по дороге переход в другую ячейку, находим пограничные координаты для обеих ячеек
         // для каждой ячейки находим местный трек (GirdTrack)
-        val splittedByCellsTrack = SplittedByCellsTrack(mutableMapOf<CellCoordinates, CellTrack>())
-        val firstCellTrack = CellTrack(trackId, mutableListOf())
+        val splittedByCellsTrack = SplittedByCellsTrack(trackId)
         var currentCell = cellCoordinates(track.turnPoints[0])
 
-        val firstTurnPoint: CellLocation = coordinatesInsideCell(
-            globalCoordinates = track.turnPoints[0], cellCoordinates = currentCell)
-        firstCellTrack.turnPoints.add(firstTurnPoint)
-        splittedByCellsTrack[currentCell] = firstCellTrack
+        val currentTurnPoint: CellLocation = coordinatesInsideCell(
+            globalCoordinates = track.turnPoints[0], coordinatesOfCell = currentCell)
+        splittedByCellsTrack.addLocation(coordinatesOfCell = currentCell, cellLocation = currentTurnPoint)
+
+        val transitionManager = TransitionManager(cellSize)
 
         var i = 1
         while (i < track.turnPoints.size) {
-            var currentTurnPoint: CellLocation
+            val relativeNextCoordinates: CellLocation = getRelativeForNext(
+                nextTurnPoint = track.turnPoints[i],
+                currentTurnPoint = track.turnPoints[i-1])
+
+            var nextTurnPoint: CellLocation
+            when (transitionManager.getTransition(
+                coordinatesInCell = currentTurnPoint,
+                relativeCoordinatesNext = relativeNextCoordinates)) {
+                TransitionTo.NORTH -> {
+                    nextTurnPoint = CellLocation(
+                        x = ,
+                        y = 0)
+                }
+                TransitionTo.NE -> {
+                    nextTurnPoint = CellLocation( x = cellSize, y = 0)
+                }
+                TransitionTo.EAST -> {}
+                TransitionTo.SE -> {
+                    nextTurnPoint = CellLocation(x = cellSize, y = cellSize)
+                }
+                TransitionTo.SOUTH -> {}
+                TransitionTo.SW -> {
+                    nextTurnPoint = CellLocation(x = 0, y = cellSize)
+                }
+                TransitionTo.WEST -> {}
+                TransitionTo.NW -> {
+                    nextTurnPoint = CellLocation(x = 0, y = 0)}
+                TransitionTo.NONE -> {
+                    nextTurnPoint = CellLocation( // todo go one to the next point
+                        x = currentTurnPoint.x + relativeNextCoordinates.x,
+                        y = currentTurnPoint.y + relativeNextCoordinates.y)
+                }
+            }
+
+
             val nextCell = cellCoordinates(track.turnPoints[i])
             if (nextCell != currentCell) {
                 currentCell =
@@ -59,19 +95,30 @@ class TracksGirdCalculator(
         return SplittedByCellsTrack(cellData = splittedByCellsTrack)
     }
 
-    private fun cellCoordinates(globalCoordinates: GlobalTurnPoint): CellCoordinates {
-        val cellCoordinates = CellCoordinates(
+    private fun cellCoordinates(globalCoordinates: GlobalTurnPoint): CoordinatesOfCell {
+        val coordinatesOfCell = CoordinatesOfCell(
+            // todo: тут будет необходимо учесть, что мы берем координаты ячеек из глобальных координат
+            // брать из местных?
             x = globalCoordinates.longitude/cellSize.toInt(),
             y = globalCoordinates.latitude/cellSize.toInt()
         )
-        return cellCoordinates
+        return coordinatesOfCell
     }
 
-    private fun coordinatesInsideCell (globalCoordinates: GlobalTurnPoint, cellCoordinates: CellCoordinates): CellLocation {
+    private fun coordinatesInsideCell (globalCoordinates: GlobalTurnPoint, coordinatesOfCell: CoordinatesOfCell): CellLocation {
         return CellLocation(
-            x = globalCoordinates.longitude - (cellCoordinates.x*cellSize),
-            y = globalCoordinates.latitude - (cellCoordinates.y*cellSize)
+            x = globalCoordinates.longitude - (coordinatesOfCell.x*cellSize),
+            y = globalCoordinates.latitude - (coordinatesOfCell.y*cellSize)
         )
+    }
+
+    private fun getRelativeForNext(
+        nextTurnPoint: GlobalTurnPoint,
+        currentTurnPoint: GlobalTurnPoint
+        ): CellLocation {
+        return CellLocation(
+            x = nextTurnPoint.longitude - currentTurnPoint.longitude,
+            y = nextTurnPoint.latitude - currentTurnPoint.latitude )
     }
 
     private fun isCellsHasTransition(currentPosition: Int, turnPoints: List<GlobalTurnPoint>): Boolean {
