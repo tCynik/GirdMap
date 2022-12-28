@@ -41,9 +41,14 @@ class TracksGirdCalculator(
                 currentTurnPoint = track.turnPoints[i-1])
 
             var nextTurnPoint: CellLocation
-            when (transitionManager.getTransition(
+            // todo: need 2 provide: 1) next turnpoint in current cell,
+            //  2) next cell (if it is),
+            //  3) turnpoint in the next cell (if it is)
+            val transition = transitionManager.getTransition(
                 coordinatesInCell = currentTurnPoint,
-                relativeCoordinatesNext = relativeNextCoordinates)) {
+                relativeCoordinatesNext = relativeNextCoordinates)
+
+            when (transition) {
                 TransitionTo.NORTH -> {
                     nextTurnPoint = CellLocation(
                         x = ,
@@ -64,7 +69,7 @@ class TracksGirdCalculator(
                 TransitionTo.NW -> {
                     nextTurnPoint = CellLocation(x = 0, y = 0)}
                 TransitionTo.NONE -> {
-                    nextTurnPoint = CellLocation( // todo go one to the next point
+                    nextTurnPoint = CellLocation( // todo: go one to the next point
                         x = currentTurnPoint.x + relativeNextCoordinates.x,
                         y = currentTurnPoint.y + relativeNextCoordinates.y)
                 }
