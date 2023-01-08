@@ -1,16 +1,15 @@
 package com.example.lessongirdrecycler.domain.models.cell
 
-class SplittedByCellsTrack(val trackId: Int) {
-    private var cellData: MutableMap<CoordinatesOfCell, CellTrack> = mutableMapOf()
+class SplittedByCellsTrack() {
+    var cellData = mutableListOf<TrackPartInSingleCell>()
 
     fun addLocation (coordinatesOfCell: CoordinatesOfCell, cellLocation: CellLocation) {
-        if (!cellData.containsKey(coordinatesOfCell)) {
-            cellData.put(coordinatesOfCell, CellTrack(trackId, cellLocation))
-            cellData[coordinatesOfCell]!!.addLocation(cellLocation)
+        val currentPart = cellData[cellData.size]
+        if (coordinatesOfCell != currentPart.cell) { // это новая ячейка, добавляем
+            cellData.add(TrackPartInSingleCell(cell = coordinatesOfCell, track = mutableListOf()))
+            cellData[cellData.size].addPointToTrack(cellLocation)
+        } else {// действуем в рамках старой ячейки, добавляем точку туда
+            currentPart.track.add(cellLocation)
         }
-    }
-
-    fun getCellData(): MutableMap<CoordinatesOfCell, CellTrack> {
-        return cellData
     }
 }

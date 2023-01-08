@@ -1,8 +1,6 @@
-package com.example.lessongirdrecycler.models
+package com.example.lessongirdrecycler.domain.models.global
 
-import com.example.lessongirdrecycler.domain.models.global.GlobalTurnPoint
-
-data class Track(val id: Int, val name: String, val turnPoints: MutableList<GlobalTurnPoint> ) {
+data class GlobalTrack(val id: Int, val turnPoints: MutableList<GlobalTurnPoint> ) {
     fun addTurnPoint(nextTurnPoint: GlobalTurnPoint) {
         turnPoints.add(nextTurnPoint)
     }

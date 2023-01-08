@@ -6,7 +6,7 @@ import com.example.lessongirdrecycler.domain.coordinates_calculator.gird_transit
 import com.example.lessongirdrecycler.domain.models.cell.SplittedByCellsTrack
 import com.example.lessongirdrecycler.domain.models.cell.CoordinatesOfCell
 import com.example.lessongirdrecycler.domain.models.cell.CellLocation
-import com.example.lessongirdrecycler.models.Track
+import com.example.lessongirdrecycler.domain.models.global.GlobalTrack
 import com.example.lessongirdrecycler.domain.models.global.GlobalTurnPoint
 import com.example.lessongirdrecycler.domain.models.segment.CellTransitionByEnum
 import com.example.lessongirdrecycler.domain.models.segment.Segment
@@ -24,11 +24,11 @@ class TracksGirdCalculator(
     val cellSize: Int // размер клетки в базовых единицах глобальной системы координат
     ) {
 
-    fun splitTrackToCells(trackId: Int, track: Track): SplittedByCellsTrack {
+    fun splitTrackToCells(track: GlobalTrack): SplittedByCellsTrack {
         // каждой координате определяем ячейку, в которой точка, и координаты точки внутри ячейки
         // Если по дороге переход в другую ячейку, находим пограничные координаты для обеих ячеек
         // для каждой ячейки находим местный трек (GirdTrack)
-        val splittedByCellsTrack = SplittedByCellsTrack(trackId)
+        val splittedByCellsTrack = SplittedByCellsTrack()
         var currentCell = cellCoordinates(track.turnPoints[0])
 
         val firstTurnPoint: CellLocation = coordinatesInsideCell(
