@@ -1,19 +1,22 @@
 package com.example.lessongirdrecycler.domain.coordinates_calculator
 
+import com.example.lessongirdrecycler.domain.coordinates_calculator.gird_transition.NextCellNumber
 import com.example.lessongirdrecycler.domain.coordinates_calculator.gird_transition.TransitionManager
 import com.example.lessongirdrecycler.domain.coordinates_calculator.gird_transition.TransitionTo
 import com.example.lessongirdrecycler.domain.models.cell.SplittedByCellsTrack
 import com.example.lessongirdrecycler.domain.models.cell.CoordinatesOfCell
-import com.example.lessongirdrecycler.domain.models.cell.CellTrack
 import com.example.lessongirdrecycler.domain.models.cell.CellLocation
 import com.example.lessongirdrecycler.models.Track
 import com.example.lessongirdrecycler.domain.models.global.GlobalTurnPoint
+import com.example.lessongirdrecycler.domain.models.segment.CellTransitionByEnum
+import com.example.lessongirdrecycler.domain.models.segment.Segment
 
 /**
+ * Растаскивание трека глобальных точек на серию треков в рамках отдельных ячеек координатной сетки
+ * (т.е. получаем набор мини-треков с отметкой - к какоя ячейке они относятся)
  * логика такая:
- * Координаты, с которыми работаем: глобальные, кординаты карты, кординаты квадрата
  * 1. есть начало координат, относительно которого из лобальных координат получаем кординаты карты
- *
+ * 2.
  */
 class TracksGirdCalculator(
     val girdStartX: Double,
@@ -28,76 +31,53 @@ class TracksGirdCalculator(
         val splittedByCellsTrack = SplittedByCellsTrack(trackId)
         var currentCell = cellCoordinates(track.turnPoints[0])
 
-        val currentTurnPoint: CellLocation = coordinatesInsideCell(
+        val firstTurnPoint: CellLocation = coordinatesInsideCell(
             globalCoordinates = track.turnPoints[0], coordinatesOfCell = currentCell)
-        splittedByCellsTrack.addLocation(coordinatesOfCell = currentCell, cellLocation = currentTurnPoint)
-
-        val transitionManager = TransitionManager(cellSize)
+        splittedByCellsTrack.addLocation(coordinatesOfCell = currentCell, cellLocation = firstTurnPoint)
 
         var i = 1
         while (i < track.turnPoints.size) {
-            val relativeNextCoordinates: CellLocation = getRelativeForNext(
-                nextTurnPoint = track.turnPoints[i],
-                currentTurnPoint = track.turnPoints[i-1])
+            val segmentStartCell = cellCoordinates(track.turnPoints[i-1])
+            val segmentEndCell = cellCoordinates(track.turnPoints[i])
 
-            var nextTurnPoint: CellLocation
-            // todo: need 2 provide: 1) next turnpoint in current cell,
-            //  2) next cell (if it is),
-            //  3) turnpoint in the next cell (if it is)
-            val transition = transitionManager.getTransition(
-                coordinatesInCell = currentTurnPoint,
-                relativeCoordinatesNext = relativeNextCoordinates)
+            var currentSegment = Segment(
+                cellSize = cellSize,
+                startCellLocation = coordinatesInsideCell(track.turnPoints[i-1], segmentStartCell),
+                endSegmentCellLocation = coordinatesInsideCell(track.turnPoints[i], segmentStartCell))
 
-            when (transition) {
-                TransitionTo.NORTH -> {
-                    nextTurnPoint = CellLocation(
-                        x = ,
-                        y = 0)
+            if (segmentStartCell.equals(segmentEndCell)) { // если конец сегмента в этой же ячейке
+                splittedByCellsTrack.addLocation(coordinatesOfCell = segmentStartCell, cellLocation = currentSegment.endSegmentCellLocation)
+            } else { // либо если сегмент придется разбивать
+                var transitionTo = TransitionManager(cellSize).getTransitionTo(
+                    currentSegment.startCellLocation,
+                    currentSegment.endSegmentCellLocation)
+                var nextCellNumber = NextCellNumber().get(
+                    cellNumber = segmentStartCell,
+                    transitionTo = transitionTo)
+
+                while (transitionTo != TransitionTo.NONE) {
+                    transitionTo = TransitionManager(cellSize).getTransitionTo( // преверяем на наличие перехода
+                        currentSegment.startCellLocation,
+                        currentSegment.endSegmentCellLocation)
+
+                    nextCellNumber = NextCellNumber().get(
+                        cellNumber = segmentStartCell,
+                        transitionTo = transitionTo)
+                    val transitionPoints = CellTransitionByEnum(cellSize).getTransitionPoints(
+                        transitionTo = transitionTo,
+                        startCellLocation = currentSegment.startCellLocation,
+                        endCellLocation = currentSegment.endSegmentCellLocation)
+
+                    splittedByCellsTrack.addLocation(coordinatesOfCell = segmentStartCell, cellLocation = transitionPoints[0])
+                    splittedByCellsTrack.addLocation(coordinatesOfCell = nextCellNumber, cellLocation = transitionPoints[1])
+
+                    currentSegment.cutOne(transitionPoints[0], transitionTo) // отрезаем сегмент
                 }
-                TransitionTo.NE -> {
-                    nextTurnPoint = CellLocation( x = cellSize, y = 0)
-                }
-                TransitionTo.EAST -> {}
-                TransitionTo.SE -> {
-                    nextTurnPoint = CellLocation(x = cellSize, y = cellSize)
-                }
-                TransitionTo.SOUTH -> {}
-                TransitionTo.SW -> {
-                    nextTurnPoint = CellLocation(x = 0, y = cellSize)
-                }
-                TransitionTo.WEST -> {}
-                TransitionTo.NW -> {
-                    nextTurnPoint = CellLocation(x = 0, y = 0)}
-                TransitionTo.NONE -> {
-                    nextTurnPoint = CellLocation( // todo: go one to the next point
-                        x = currentTurnPoint.x + relativeNextCoordinates.x,
-                        y = currentTurnPoint.y + relativeNextCoordinates.y)
-                }
+                splittedByCellsTrack.addLocation(coordinatesOfCell = nextCellNumber, cellLocation = currentSegment.endSegmentLocation)
             }
-
-
-            val nextCell = cellCoordinates(track.turnPoints[i])
-            if (nextCell != currentCell) {
-                currentCell =
-
-            }
-            else {
-                splittedByCellsTrack[currentCell].addLocation()
-            }
-
-            var cellTrack = CellTrack(id = track.id, turnPoints = mutableListOf())
-            val turnPoint = track.turnPoints[i]
-            val globalPoint = track.turnPoints[i]
-            val currentCellCoordinates = cellCoordinates(turnPoint)
-            val coordinatesInsideCell = coordinatesInsideCell(turnPoint, currentCellCoordinates)
             i++
         }
-
-        track.turnPoints.forEach{turnPoint -> {
-
-        }}
-
-        return SplittedByCellsTrack(cellData = splittedByCellsTrack)
+        return splittedByCellsTrack
     }
 
     private fun cellCoordinates(globalCoordinates: GlobalTurnPoint): CoordinatesOfCell {
@@ -115,26 +95,5 @@ class TracksGirdCalculator(
             x = globalCoordinates.longitude - (coordinatesOfCell.x*cellSize),
             y = globalCoordinates.latitude - (coordinatesOfCell.y*cellSize)
         )
-    }
-
-    private fun getRelativeForNext(
-        nextTurnPoint: GlobalTurnPoint,
-        currentTurnPoint: GlobalTurnPoint
-        ): CellLocation {
-        return CellLocation(
-            x = nextTurnPoint.longitude - currentTurnPoint.longitude,
-            y = nextTurnPoint.latitude - currentTurnPoint.latitude )
-    }
-
-    private fun isCellsHasTransition(currentPosition: Int, turnPoints: List<GlobalTurnPoint>): Boolean {
-        if (currentPosition < turnPoints.size) {
-            val currentCellCoordinates = cellCoordinates(turnPoints[currentPosition])
-            val nextCellCoordinates = cellCoordinates(turnPoints[currentPosition])
-            val differentX = currentCellCoordinates.x - nextCellCoordinates.x
-            val differentY = currentCellCoordinates.y - nextCellCoordinates.y
-            // далее определяем тип перехода: вверх-вниз-вправо-влево
-            if (cellCoordinates(turnPoints[currentPosition].
-                equals(cellCoordinates(turnPoints[currentPosition+1])
-        } else return false
     }
 }
