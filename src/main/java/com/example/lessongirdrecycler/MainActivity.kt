@@ -1,9 +1,11 @@
 package com.example.lessongirdrecycler
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.lessongirdrecycler.data.TrackRepository
+import com.example.lessongirdrecycler.models.TracksPack
 import com.example.lessongirdrecycler.presentation.MainViewModel
 
 /**
@@ -29,12 +31,21 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mainViewModel: MainViewModel
 
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         val currentTrack = TrackRepository().loadNextTrack()
         mainViewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+    }
+
+    override fun onResume() {
+        initObservers()
+        super.onResume()
+    }
+
+    private fun initObservers() {
+        mainViewModel.tracksAndCellsLive.observe(this, Observer<TracksPack>{value -> adapter.updateTracks(value)})
+
     }
 }

@@ -5,7 +5,7 @@ import com.example.lessongirdrecycler.domain.models.global.GlobalTurnPoint
 
 class TrackRepository {
     fun loadNextTrack(): GlobalTrack {
-        var myTrack = GlobalTrack("my track", mutableListOf<GlobalTurnPoint>())
+        var myTrack = GlobalTrack(id = 0, mutableListOf<GlobalTurnPoint>())
         myTrack.addTurnPoint(GlobalTurnPoint(0, 0))
         var maxLat = 0
         var maxLon = 0

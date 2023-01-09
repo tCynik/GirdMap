@@ -12,11 +12,11 @@ class MainViewModel: ViewModel() {
     val cells: List<List<CellTracks>> = mutableListOf()
     lateinit var trackGirdCalculator: TracksGirdCalculator
 
-    val tracksAndCellsLive = TracksPack()
-    
+    val tracksAndCellsLive = MutableLiveData<TracksPack>()
+
     fun showTheTrack(trackToShow: GlobalTrack) {
         val splittedTrack = trackGirdCalculator.splitTrackToCells(trackToShow)
-        tracksAndCellsLive.addSplittedTrack(splittedTrack)
+        tracksAndCellsLive.value!!.addSplittedTrack(splittedTrack)
     }
 
     fun updateTracks (track: GlobalTrack) {
