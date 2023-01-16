@@ -6,23 +6,50 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" >
-
-        <HorizontalScrollView
+    <HorizontalScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/my_recycler"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"/>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/map_layout"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"/>
-        </HorizontalScrollView>
-    </ScrollView>
+    </HorizontalScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_margin="5dp"
+            android:id="@+id/span_inc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="col+"/>
+        <Button
+            android:layout_margin="5dp"
+            android:id="@+id/span_dec"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="col-"/>
+
+        <Button
+            android:layout_margin="5dp"
+            android:id="@+id/item_inc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="item+"/>
+        <Button
+            android:layout_margin="5dp"
+            android:id="@+id/item_dec"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="item-"/>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

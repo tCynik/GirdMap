@@ -1,12 +1,18 @@
 package com.example.lessongirdrecycler
 
 import android.os.Bundle
+import android.view.View
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.lessongirdrecycler.data.TrackRepository
 import com.example.lessongirdrecycler.models.TracksPack
 import com.example.lessongirdrecycler.presentation.MainViewModel
+import com.example.lessongirdrecycler.presentation.MapCellsAdapter
+import com.example.lessongirdrecycler.presentation.painting.TrackPainter
 
 /**
  * 1. генерим рандомный трек гобальных координат
@@ -29,14 +35,41 @@ import com.example.lessongirdrecycler.presentation.MainViewModel
  */
 class MainActivity : AppCompatActivity() {
     private lateinit var mainViewModel: MainViewModel
-
+    var mapRecyclerView: RecyclerView? = null
+    private val trackPainter = TrackPainter()
+    var numberOfColumns = 2
+    private val elementsCount = 100
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val adapter = MapCellsAdapter(elementsCount)
+        mapRecyclerView = findViewById(R.id.my_recycler)
+
+        val layoutManager = GridLayoutManager(this, numberOfColumns)
+        mapRecyclerView!!.layoutManager = layoutManager
+        mapRecyclerView!!.setHasFixedSize(true) // нужно тупо для эффективности
+        mapRecyclerView!!.adapter = adapter
+
+        // работа с кнопками
+        val buttonColumnInc = findViewById<Button>(R.id.span_inc)
+        val buttonColumnDec = findViewById<Button>(R.id.span_dec)
+
+        buttonColumnInc.setOnClickListener(View.OnClickListener {
+            numberOfColumns++
+            updateSpanCount()
+        })
+        buttonColumnDec.setOnClickListener(View.OnClickListener {
+            numberOfColumns--
+            updateSpanCount()
+        })
+
+
         val currentTrack = TrackRepository().loadNextTrack()
         mainViewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+
+
     }
 
     override fun onResume() {
@@ -45,7 +78,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initObservers() {
-        mainViewModel.tracksAndCellsLive.observe(this, Observer<TracksPack>{value -> adapter.updateTracks(value)})
+        mainViewModel.tracksAndCellsLive.observe(
+            this, Observer<TracksPack>{value -> trackPainter.updateTracks(value)})
 
     }
+
+    private fun updateSpanCount() {
+        val layoutManager = GridLayoutManager(this, numberOfColumns)
+        mapRecyclerView!!.layoutManager = layoutManager
+    }
+
 }
