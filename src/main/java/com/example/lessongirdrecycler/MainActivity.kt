@@ -37,14 +37,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mainViewModel: MainViewModel
     var mapRecyclerView: RecyclerView? = null
     private val trackPainter = TrackPainter()
-    var numberOfColumns = 2
+    var numberOfColumns = 5
     private val elementsCount = 100
+    val adapter = MapCellsAdapter(elementsCount, numberOfColumns)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val adapter = MapCellsAdapter(elementsCount)
+        //val adapter = MapCellsAdapter(elementsCount, numberOfColumns)
         mapRecyclerView = findViewById(R.id.my_recycler)
 
         val layoutManager = GridLayoutManager(this, numberOfColumns)
@@ -86,6 +87,7 @@ class MainActivity : AppCompatActivity() {
     private fun updateSpanCount() {
         val layoutManager = GridLayoutManager(this, numberOfColumns)
         mapRecyclerView!!.layoutManager = layoutManager
+        adapter.updateColumnsNumber(numberOfColumns)
     }
 
 }
