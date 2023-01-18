@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lessongirdrecycler.data.TrackRepository
+import com.example.lessongirdrecycler.domain.models.cell.CellLocation
 import com.example.lessongirdrecycler.models.TracksPack
 import com.example.lessongirdrecycler.presentation.MainViewModel
 import com.example.lessongirdrecycler.presentation.MapCellsAdapter
@@ -36,7 +37,7 @@ import com.example.lessongirdrecycler.presentation.painting.TrackPainter
 class MainActivity : AppCompatActivity() {
     private lateinit var mainViewModel: MainViewModel
     var mapRecyclerView: RecyclerView? = null
-    private val trackPainter = TrackPainter()
+    //private val trackPainter = TrackPainter(this, CellLocation(0,0)) // todo: Убрать отсюда - в каждой ячейке свой (см ниже в обсерверах, разбраться)
     var numberOfColumns = 5
     private val elementsCount = 100
     val adapter = MapCellsAdapter(elementsCount, numberOfColumns)
@@ -79,8 +80,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initObservers() {
-        mainViewModel.tracksAndCellsLive.observe(
-            this, Observer<TracksPack>{value -> trackPainter.updateTracks(value)})
+//        mainViewModel.tracksAndCellsLive.observe(
+//            this, Observer<TracksPack>{value -> trackPainter.updateTracks(value)})
 
     }
 

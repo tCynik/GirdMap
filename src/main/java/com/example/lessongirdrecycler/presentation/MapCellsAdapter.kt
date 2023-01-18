@@ -9,6 +9,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lessongirdrecycler.R
 import com.example.lessongirdrecycler.domain.models.cell.CellLocation
+import com.example.lessongirdrecycler.presentation.painting.CurrentTrackLine
+import com.example.lessongirdrecycler.presentation.painting.TrackPainter
 
 class MapCellsAdapter(var numberItems: Int, var columnsNumber: Int): RecyclerView.Adapter<MapCellsAdapter.MapViewHolder>() {
     private var nubmerViewHolders = 0
@@ -17,7 +19,11 @@ class MapCellsAdapter(var numberItems: Int, var columnsNumber: Int): RecyclerVie
         private val listItemNumberView: TextView = itemView.findViewById(R.id.tv_number_item)
         val viewHolderNumber: TextView = itemView.findViewById(R.id.tv_holder_number)
         val mapPlace: LinearLayout = itemView.findViewById(R.id.cell_map)
+        val trackPainter = CurrentTrackLine(itemView.context, CellLocation(0, 0))
 
+        init{
+            mapPlace.addView(trackPainter)
+        }
         fun updateStatus(track: MutableList<CellLocation>){
             // тут создаем canvas, который будет рисовать трек
         }
@@ -30,7 +36,6 @@ class MapCellsAdapter(var numberItems: Int, var columnsNumber: Int): RecyclerVie
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MapViewHolder {
         val inflator = LayoutInflater.from(parent.context)
         val view = inflator.inflate(R.layout.item_layout, parent, false)
-
         val viewHolder = MapViewHolder(view)
 
         // значение на всю жизнь для каждого вью холдера (повторяющееся при переиспользовании)
@@ -41,6 +46,8 @@ class MapCellsAdapter(var numberItems: Int, var columnsNumber: Int): RecyclerVie
 
     override fun onBindViewHolder(holder: MapViewHolder, position: Int) {
         holder.setText(calculateCellPosition(position))
+        Log.i("Bugfix: Adapter", "onBindViewHolder # ${calculateCellPosition(position)}")
+        holder.trackPainter.drawNextSegment(CellLocation(200, 200))
     }
 
     override fun getItemCount(): Int {
