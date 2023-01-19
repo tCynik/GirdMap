@@ -9,8 +9,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lessongirdrecycler.data.TrackRepository
-import com.example.lessongirdrecycler.domain.models.cell.CellLocation
-import com.example.lessongirdrecycler.models.TracksPack
 import com.example.lessongirdrecycler.presentation.MainViewModel
 import com.example.lessongirdrecycler.presentation.MapCellsAdapter
 import com.example.lessongirdrecycler.presentation.painting.TrackPainter
@@ -76,6 +74,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         initObservers()
+
+        //adapter.notifyDataSetChanged()
         super.onResume()
     }
 
