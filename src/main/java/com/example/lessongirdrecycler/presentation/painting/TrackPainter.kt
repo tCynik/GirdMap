@@ -25,12 +25,17 @@ open class TrackPainter(context: Context, startPosition: CellLocation): View(con
 //        }
 //    }
 
-    fun drawNextSegment(cellLocation: CellLocation) {
+    fun drawTrack(track: List<CellLocation>) {
+        for (point in track)
+            drawNextSegment(point)
+    }
+
+    private fun drawNextSegment(cellLocation: CellLocation) {
         val lineToX = cellLocation.x.toFloat()
         val lineToY = cellLocation.y.toFloat()
         path.lineTo(lineToX, lineToY)
         path.moveTo(lineToX, lineToY)
-         Log.i("bugfix: TrackPainter", "drawing the segment to $lineToX : $lineToY")
+//         Log.i("bugfix: TrackPainter", "drawing the segment to $lineToX : $lineToY")
         invalidate()
     }
 

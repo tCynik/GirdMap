@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lessongirdrecycler.data.TrackRepository
+import com.example.lessongirdrecycler.models.TracksPack
 import com.example.lessongirdrecycler.presentation.MainViewModel
 import com.example.lessongirdrecycler.presentation.MapCellsAdapter
 import com.example.lessongirdrecycler.presentation.painting.TrackPainter
@@ -68,7 +69,7 @@ class MainActivity : AppCompatActivity() {
 
         val currentTrack = TrackRepository().loadNextTrack()
         mainViewModel = ViewModelProvider(this).get(MainViewModel::class.java)
-
+        mainViewModel.updateTracks(currentTrack)
 
     }
 
@@ -80,8 +81,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initObservers() {
-//        mainViewModel.tracksAndCellsLive.observe(
-//            this, Observer<TracksPack>{value -> trackPainter.updateTracks(value)})
+        mainViewModel.tracksAndCellsLive.observe(
+            this, Observer<TracksPack>{ value -> adapter.updateCellsTrackData(value.tracksByCells)})
 
     }
 

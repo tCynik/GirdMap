@@ -4,13 +4,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
+import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.lessongirdrecycler.R
-import com.example.lessongirdrecycler.domain.models.CellTracks
 import com.example.lessongirdrecycler.domain.models.cell.*
 import com.example.lessongirdrecycler.presentation.painting.CurrentTrackLine
+import java.util.*
 
 // в полях имеем мапу "координаты ячейки - набор CellTrack'ов"
 // при байдинге во вью холдерах рисуем все треки относящиеся к конкретной ячейке
@@ -18,56 +18,67 @@ import com.example.lessongirdrecycler.presentation.painting.CurrentTrackLine
 
 class MapCellsAdapter(var numberItems: Int, var columnsNumber: Int): RecyclerView.Adapter<MapCellsAdapter.MapViewHolder>() {
     private var nubmerViewHolders = 0
-    private var cellData = mutableListOf<TrackPartInSingleCell>()
-    private var tracksDataByCells = mutableMapOf<CoordinatesOfCell, MutableList<CellTrack>>()
+    private var tracksDataByCells = mutableMapOf<CoordinatesOfCell, LinkedList<CellTrack>>()
 
     init{tempInitTestTrack()}
 
     private fun tempInitTestTrack() { // todo: just for test, to be deleted
-        val cell = CoordinatesOfCell(1, 1)
-        val turnPoints = mutableListOf<CellLocation>()
+        var cell = CoordinatesOfCell(1, 1)
+        var turnPoints = LinkedList<CellLocation>()
         turnPoints.add(CellLocation(10, 10))
         turnPoints.add(CellLocation(150, 120))
         turnPoints.add(CellLocation(200, 180))
         turnPoints.add(CellLocation(230, 250))
         turnPoints.add(CellLocation(300, 400))
 
-        val track = CellTrack(id = 1, turnPoints)
+        var track = CellTrack(id = 1, turnPoints)
 
-        val list = mutableListOf<CellTrack>(track)
+        var list = LinkedList<CellTrack>()
+        list.add(track)
         tracksDataByCells[cell] = list
+
+        cell = CoordinatesOfCell(1, 2)
+        turnPoints = LinkedList<CellLocation>()
+        turnPoints.add(CellLocation(10, 10))
+        turnPoints.add(CellLocation(150, 120))
+        turnPoints.add(CellLocation(200, 180))
+        turnPoints.add(CellLocation(230, 250))
+        turnPoints.add(CellLocation(300, 400))
+        track = CellTrack(id = 2, turnPoints)
+        list.add(track)
+        tracksDataByCells[cell] = list
+
     }
 
     class MapViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         private val listItemNumberView: TextView = itemView.findViewById(R.id.tv_number_item)
         val viewHolderNumber: TextView = itemView.findViewById(R.id.tv_holder_number)
-        val mapPlace: LinearLayout = itemView.findViewById(R.id.cell_map)
-        val trackLine = CurrentTrackLine(itemView.context, CellLocation(0, 0)) // todo: delete
+        val mapPlace: FrameLayout = itemView.findViewById(R.id.cell_map)
+        //val trackLines = mutableListOf(CurrentTrackLine(itemView.context, CellLocation(0, 0))) // todo: delete
+        val trackLines: MutableList<CurrentTrackLine> = mutableListOf()
 
-        init{
-            mapPlace.addView(trackLine)
+        fun addViews() { // todo: try to add several views
+            mapPlace.removeAllViews()
+            for (currentView in trackLines) {
+                mapPlace.addView(currentView)
+            }
         }
 
         fun setText(text: String) {
             listItemNumberView.text = text // todo: delete
         }
 
-        fun paintTracks(tracks: List<CellTrack>) {
-            for (currentTrack in tracks) {
-                drawTheTrack(currentTrack)
+        fun makeTrackLines(tracks: List<CellTrack>) {
+            trackLines.clear()
+            for (track in tracks) {
+                val currentTrackLine = CurrentTrackLine(
+                    itemView.context,
+                    CellLocation(track.turnPoints[0].x, track.turnPoints[0].y))
+                currentTrackLine.drawTrack(track.turnPoints)
+                trackLines.add(currentTrackLine)
             }
         }
 
-        private fun drawTheTrack(track: CellTrack) {
-            val turnPoints = track.turnPoints
-            val firstPoint = turnPoints[0]
-            val line = CurrentTrackLine(itemView.context, CellLocation(x = firstPoint.x, y = firstPoint.y))
-            for (i in 1 until turnPoints.size) {
-                line.drawNextSegment(turnPoints[i])
-            }
-
-            mapPlace.addView(line)
-        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MapViewHolder {
@@ -87,26 +98,21 @@ class MapCellsAdapter(var numberItems: Int, var columnsNumber: Int): RecyclerVie
         holder.setText(coordinatesString)
 
         val currentCellCoordinate = coordinatesCellByPosition(position)
-        if (tracksDataByCells.containsKey(currentCellCoordinate)) {
-            Log.i("bugfix: adapter", "data contains track for cell ${currentCellCoordinate.toString()}")
-            val cellTracks = tracksDataByCells[currentCellCoordinate]
-            holder.paintTracks(cellTracks!!)
+        if (tracksDataByCells.containsKey(currentCellCoordinate) &&
+            tracksDataByCells[currentCellCoordinate]!=null) {
+            Log.i("bugfix: adapter", "data contains track for cell ${currentCellCoordinate.toString()}, position = $position")
+            holder.makeTrackLines(tracksDataByCells[currentCellCoordinate]!!)
+            holder.addViews()
         }
-
-        //holder.trackLine.drawNextSegment(CellLocation(200, 200))
     }
 
     override fun getItemCount(): Int {
         return  numberItems
     }
 
-    fun drawSingleTrack(cell: CoordinatesOfCell, track: CellTrack) {
-        val cellNumber = positionCellByCoordinates(cell)
-
-    }
-
-    fun setCellsTrackData(data: MutableMap<CoordinatesOfCell, MutableList<CellTrack>>) {
+    fun updateCellsTrackData(data: MutableMap<CoordinatesOfCell, LinkedList<CellTrack>>) {
         tracksDataByCells = data
+        notifyDataSetChanged() // todo: think about optimization this place
     }
 
     fun updateColumnsNumber(number: Int) {
@@ -122,10 +128,4 @@ class MapCellsAdapter(var numberItems: Int, var columnsNumber: Int): RecyclerVie
     private fun positionCellByCoordinates(coordinates: CoordinatesOfCell): Int {
         return coordinates.y * columnsNumber + coordinates.x
     }
-}
-
-class CellsTracksData {
-    val data = mapOf<CoordinatesOfCell, List<SplittedByCellsTrack>>()
-
-
 }
