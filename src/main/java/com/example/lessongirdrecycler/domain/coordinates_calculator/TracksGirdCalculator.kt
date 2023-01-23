@@ -1,5 +1,6 @@
 package com.example.lessongirdrecycler.domain.coordinates_calculator
 
+import android.util.Log
 import com.example.lessongirdrecycler.domain.coordinates_calculator.gird_transition.NextCellNumber
 import com.example.lessongirdrecycler.domain.coordinates_calculator.gird_transition.TransitionManager
 import com.example.lessongirdrecycler.domain.coordinates_calculator.gird_transition.TransitionTo
@@ -24,26 +25,29 @@ class TracksGirdCalculator(
     val cellSize: Int // размер клетки в базовых единицах глобальной системы координат
     ) {
 
-    fun splitTrackToCells(track: GlobalTrack): SplittedByCellsTrack {
+    fun splitGlobalTrackToCells(track: GlobalTrack): SplittedByCellsTrack {
         // каждой координате определяем ячейку, в которой точка, и координаты точки внутри ячейки
         // Если по дороге переход в другую ячейку, находим пограничные координаты для обеих ячеек
         // для каждой ячейки находим местный трек (GirdTrack)
         val splittedByCellsTrack = SplittedByCellsTrack()
         var currentCell = cellCoordinates(track.turnPoints[0])
 
-        val firstTurnPoint: CellLocation = coordinatesInsideCell(
+        val firstTurnPoint: CellLocation = coordinatesInsideCellByGlobal(
             globalCoordinates = track.turnPoints[0], coordinatesOfCell = currentCell)
         splittedByCellsTrack.addLocation(coordinatesOfCell = currentCell, cellLocation = firstTurnPoint)
 
         var i = 1
         while (i < track.turnPoints.size) {
-            val segmentStartCell = cellCoordinates(track.turnPoints[i-1])
-            val segmentEndCell = cellCoordinates(track.turnPoints[i])
+            val currentTurnPoint = track.turnPoints[i-1]
+            val nextTurnPoint = track.turnPoints[i]
 
-            var currentSegment = Segment(
+            val segmentStartCell = cellCoordinates(currentTurnPoint)
+            val segmentEndCell = cellCoordinates(nextTurnPoint)
+
+            var currentSegment = Segment( // берём текущий сегмент с системе координат стартовой его ячейки
                 cellSize = cellSize,
-                startCellLocation = coordinatesInsideCell(track.turnPoints[i-1], segmentStartCell),
-                endSegmentCellLocation = coordinatesInsideCell(track.turnPoints[i], segmentStartCell))
+                startCellLocation = coordinatesInsideCellByGlobal(currentTurnPoint, segmentStartCell),
+                endSegmentCellLocation = coordinatesInsideCellByGlobal(nextTurnPoint, segmentStartCell))
 
             if (segmentStartCell.equals(segmentEndCell)) { // если конец сегмента в этой же ячейке
                 splittedByCellsTrack.addLocation(coordinatesOfCell = segmentStartCell, cellLocation = currentSegment.endSegmentCellLocation)
@@ -77,6 +81,8 @@ class TracksGirdCalculator(
             }
             i++
         }
+        Log.i("bugfix: calculator", "track was splitted:")
+        splittedByCellsTrack.cellData.forEach{trackInCell -> Log.i("bugfix", "cell#: ${trackInCell.cell} , start: ${trackInCell.track[0]}, end: ${trackInCell.track[trackInCell.track.size -1]}")}
         return splittedByCellsTrack
     }
 
@@ -90,10 +96,12 @@ class TracksGirdCalculator(
         return coordinatesOfCell
     }
 
-    private fun coordinatesInsideCell (globalCoordinates: GlobalTurnPoint, coordinatesOfCell: CoordinatesOfCell): CellLocation {
+    private fun coordinatesInsideCellByGlobal (globalCoordinates: GlobalTurnPoint, coordinatesOfCell: CoordinatesOfCell): CellLocation {
         return CellLocation(
             x = globalCoordinates.longitude - (coordinatesOfCell.x*cellSize),
             y = globalCoordinates.latitude - (coordinatesOfCell.y*cellSize)
         )
     }
+
+//    private fun coordinatesInsideCellByLocal (cellLocation: CellLocation, )
 }

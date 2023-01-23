@@ -21,7 +21,7 @@ class MainViewModel: ViewModel() {
     }
 
     fun updateTracks (track: GlobalTrack) {
-        val splittedTrack = calculatorWithInitChecking(startPoint = track.turnPoints[0]).splitTrackToCells(track)
+        val splittedTrack = calculatorWithInitChecking(startPoint = track.turnPoints[0]).splitGlobalTrackToCells(track)
         tracksAndCellsLive.value!!.addSplittedTrack(splittedTrack)
     }
 
