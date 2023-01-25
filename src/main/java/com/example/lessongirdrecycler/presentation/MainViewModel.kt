@@ -31,6 +31,7 @@ class MainViewModel: ViewModel() {
             trackGirdCalculator = TracksGirdCalculator(
                 girdStartX = startPoint.latitude.toDouble(),  // todo: when migrating to location remove toDouble() cast
                 girdStartY = startPoint.longitude.toDouble(),
+                coordinateScale = 1,
                 cellSize = cellSize)
             return trackGirdCalculator!!
         }
