@@ -29,4 +29,8 @@ class SplittedByCellsTrack() {
     fun getTrack(index: Int): MutableList<CellLocation> {
         return  cellData[index].track
     }
+
+    fun toString(): String {
+        // возвращаем в формате: ячейкаX:Y - точкаX:Y; точкаX:Y; ... точкаX:Y перенос строки
+    }
 }

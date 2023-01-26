@@ -13,7 +13,7 @@ class Segment (val cellSize: Int,
             y = endSegmentCellLocation.y - startCellLocation.y)
     }
 
-    fun cutOne(nextStartLocation: CellLocation, transitionTo: TransitionTo) {
+    fun cutOne(nextStartLocation: CellLocation, transitionTo: TransitionTo) { // todo: delete?
         when(transitionTo) {
             TransitionTo.NORTH -> {
                 endSegmentLocation = CellLocation(
@@ -59,6 +59,59 @@ class Segment (val cellSize: Int,
         }
 
         startCellLocation = nextStartLocation
+    }
+
+    fun makeCutSegment(nextStartLocation: CellLocation, transitionTo: TransitionTo): Segment {
+        var endLocation = CellLocation(0, 0)
+        when(transitionTo) {
+            TransitionTo.NORTH -> {
+                endLocation = CellLocation(
+                    x = endSegmentLocation.x,
+                    y = endSegmentLocation.y - startCellLocation.y)
+            }
+            TransitionTo.NE -> {
+                endLocation = CellLocation(
+                    x = endSegmentLocation.x - (cellSize - startCellLocation.x),
+                    y = endSegmentLocation.y - startCellLocation.y)
+            }
+            TransitionTo.EAST -> {
+                endLocation = CellLocation(
+                    x = endSegmentLocation.x - (cellSize - startCellLocation.x),
+                    y = endSegmentLocation.y)
+            }
+            TransitionTo.SE -> {
+                endLocation = CellLocation(
+                    x = endSegmentLocation.x - (cellSize - startCellLocation.x),
+                    y = endSegmentLocation.y - (cellSize - startCellLocation.y))
+            }
+            TransitionTo.SOUTH -> {
+                endLocation = CellLocation(
+                    x = endSegmentLocation.x,
+                    y = endSegmentLocation.y - (cellSize - startCellLocation.y))
+            }
+            TransitionTo.SW -> {
+                endLocation = CellLocation(
+                    x = endSegmentLocation.x - (startCellLocation.x),
+                    y = endSegmentLocation.y - (cellSize - startCellLocation.y))
+            }
+            TransitionTo.WEST -> {
+                endLocation = CellLocation(
+                    x = endSegmentLocation.x - (startCellLocation.x),
+                    y = endSegmentLocation.y)
+            }
+            TransitionTo.NW -> {
+                endLocation = CellLocation(
+                    x = endSegmentLocation.x - startCellLocation.x,
+                    y = endSegmentLocation.y - startCellLocation.y)
+            }
+            TransitionTo.NONE -> {}
+        }
+
+        startCellLocation = nextStartLocation
+        return Segment(
+            cellSize = cellSize,
+            startCellLocation = startCellLocation,
+            endSegmentCellLocation = endLocation)
     }
 
 
