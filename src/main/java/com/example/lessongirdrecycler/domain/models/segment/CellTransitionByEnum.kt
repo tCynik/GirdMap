@@ -1,10 +1,11 @@
 package com.example.lessongirdrecycler.domain.models.segment
 
 import android.util.Log
+import com.example.lessongirdrecycler.domain.Logger
 import com.example.lessongirdrecycler.domain.coordinates_calculator.gird_transition.TransitionTo
 import com.example.lessongirdrecycler.domain.models.cell.CellLocation
 
-class CellTransitionByEnum(val cellSize: Int) {
+class CellTransitionByEnum(val cellSize: Int, val logger: Logger) {
     fun getTransitionPoints(
         transitionTo: TransitionTo,
         startCellLocation: CellLocation,
@@ -13,7 +14,6 @@ class CellTransitionByEnum(val cellSize: Int) {
         val endSegmentLocation = CellLocation(
             x = endCellLocation.x - startCellLocation.x,
             y = endCellLocation.y - startCellLocation.y)
-        val rateToSegmentEnd = endSegmentLocation.x/endSegmentLocation.y
 
         when (transitionTo) {
 
@@ -23,8 +23,9 @@ class CellTransitionByEnum(val cellSize: Int) {
             }
 
             TransitionTo.NE -> {
+                val rateToSegmentEnd = endSegmentLocation.x/endSegmentLocation.y
                 val rateToCellCorner = (cellSize - startCellLocation.x)/startCellLocation.y
-                if (rateToSegmentEnd < rateToCellCorner) { // через верхнюю сторону -> считаем от Y
+                if (rateToSegmentEnd > rateToCellCorner) { // через верхнюю сторону -> считаем от Y
                     // находим неполную сторону (тут это Х) через пропорцию подобных треугольников
                     // сколько осталось от неполной стороны = сколько уже есть + сколько надо пройти: Х = Хнач + Хост
                     // сколько надо пройти = остаток * пропорция: Xост = К * Xвсг
@@ -32,7 +33,7 @@ class CellTransitionByEnum(val cellSize: Int) {
                     // итого: Х = Хнач + Хвсг * (Yост / Yвсг)
                     transitionLocations.add(CellLocation(x = calculateByX(startCellLocation, endSegmentLocation), y = 0))
                     transitionLocations.add(CellLocation(x = calculateByX(startCellLocation, endSegmentLocation), y = cellSize))
-                } else if (rateToSegmentEnd > rateToCellCorner) { // через правую сторону
+                } else if (rateToSegmentEnd < rateToCellCorner) { // через правую сторону
                     transitionLocations.add(CellLocation(x = cellSize, y = calculateByY(startCellLocation, endSegmentLocation)))
                     transitionLocations.add(CellLocation(x = 0, y = calculateByY(startCellLocation, endSegmentLocation)))
                 } else { // через угол
@@ -46,16 +47,20 @@ class CellTransitionByEnum(val cellSize: Int) {
                 transitionLocations.add(CellLocation(x = 0, y = endCellLocation.y))
             }
 
-            TransitionTo.SE -> {
-                Log.i("bugfix: cellTransition", "cellSize = ${cellSize}, transition to SE. start coord: x = ${startCellLocation.x}, y = ${startCellLocation.y}")
+            TransitionTo.SE -> { // Ю.тест: поменял местами больше-меньше
+                val rateToSegmentEnd = endSegmentLocation.x/endSegmentLocation.y
+                ///Log.i("bugfix: cellTransition", "cellSize = ${cellSize}, transition to SE. start coord: x = ${startCellLocation.x}, y = ${startCellLocation.y}")
                 val rateToCellCorner = (cellSize - startCellLocation.x)/(cellSize - startCellLocation.y)
-                if (rateToSegmentEnd < rateToCellCorner) { // через бок -> считаем Y
+                if (rateToSegmentEnd > rateToCellCorner) { // через бок -> считаем Y
+                    logger.printLog("rate is less than to the corner")
                     transitionLocations.add(CellLocation(x = cellSize, y = calculateByY(startCellLocation, endSegmentLocation)))
                     transitionLocations.add(CellLocation(x = 0, y = calculateByY(startCellLocation, endSegmentLocation)))
-                } else if (rateToSegmentEnd > rateToCellCorner) { // через низ, считаем Х
+                } else if (rateToSegmentEnd < rateToCellCorner) { // через низ, считаем Х
+                    logger.printLog("rate is more than to the corner")
                     transitionLocations.add(CellLocation(x = calculateByX(startCellLocation, endSegmentLocation), y = cellSize))
                     transitionLocations.add(CellLocation(x = calculateByX(startCellLocation, endSegmentLocation), y = 0))
                 } else { // углы равны, трек идет через грань
+                    logger.printLog("rate is exact to the corner")
                     transitionLocations.add(CellLocation(x = cellSize, y = cellSize))
                     transitionLocations.add(CellLocation(x = 0, y = 0))
                 }
@@ -68,6 +73,7 @@ class CellTransitionByEnum(val cellSize: Int) {
             }
 
             TransitionTo.SW -> {
+                val rateToSegmentEnd = endSegmentLocation.x/endSegmentLocation.y
                 val rateToCellCorner = startCellLocation.x/(cellSize - startCellLocation.y)
                 if (rateToSegmentEnd < rateToCellCorner) { // calculating y
                     transitionLocations.add(CellLocation(x = 0, y = calculateByY(startCellLocation, endSegmentLocation)))
@@ -87,6 +93,7 @@ class CellTransitionByEnum(val cellSize: Int) {
             }
 
             TransitionTo.NW -> {
+                val rateToSegmentEnd = endSegmentLocation.x/endSegmentLocation.y
                 val rateToCellCorner = startCellLocation.x/startCellLocation.y
                 if (rateToSegmentEnd < rateToCellCorner) { // calculating X
                     transitionLocations.add(CellLocation(x = calculateByX(startCellLocation, endSegmentLocation), y = 0))
@@ -109,10 +116,10 @@ class CellTransitionByEnum(val cellSize: Int) {
     }
 
     private fun calculateByX(startCellLocation: CellLocation, endSegmentLocation: CellLocation): Int {
-        return ((startCellLocation.y/endSegmentLocation.y)*(endSegmentLocation.x)) + startCellLocation.x
+        return (startCellLocation.y*endSegmentLocation.x/endSegmentLocation.y) + startCellLocation.x
     }
 
     private fun calculateByY(startCellLocation: CellLocation, endSegmentLocation: CellLocation): Int {
-        return ((startCellLocation.x/endSegmentLocation.x)*(endSegmentLocation.y)) + startCellLocation.y
+        return (startCellLocation.x*endSegmentLocation.y/endSegmentLocation.x) + startCellLocation.y
     }
 }

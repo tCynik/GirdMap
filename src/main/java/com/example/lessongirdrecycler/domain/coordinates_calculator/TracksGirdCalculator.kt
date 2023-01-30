@@ -1,6 +1,7 @@
 package com.example.lessongirdrecycler.domain.coordinates_calculator
 
 import android.util.Log
+import com.example.lessongirdrecycler.domain.Logger
 import com.example.lessongirdrecycler.domain.coordinates_calculator.gird_transition.NextCellNumber
 import com.example.lessongirdrecycler.domain.coordinates_calculator.gird_transition.TransitionManager
 import com.example.lessongirdrecycler.domain.coordinates_calculator.gird_transition.TransitionTo
@@ -26,6 +27,12 @@ class TracksGirdCalculator(
     val coordinateScale: Int,
     val cellSize: Int, // размер клетки в базовых единицах глобальной системы координат
     ) {
+    companion object logger: Logger{
+        override fun printLog(logMessage: String) {
+            Log.i("bugfix: Calculator", logMessage)
+        }
+
+    }
     var splittedByCellsTrack: SplittedByCellsTrack = SplittedByCellsTrack()
 
     fun splitGlobalTrackToCells(track: GlobalTrack): SplittedByCellsTrack {
@@ -43,11 +50,11 @@ class TracksGirdCalculator(
         turnPoints.forEach{ point -> point.print(point)}
         var iter = 1
         while (iter < turnPoints.size) { // перебор точек трека
-            val bigSegment: Segment = makeBigSegment(turnPoints[iter -1], turnPoints[iter])
-            val segments: List<TrackPartInSingleCell> = splitSegment(bigSegment)
-            resultSplitted = distributeSegments(resultSplitted, segments)
-            //resultSplitted.plusSplitted(distributedByCellsSegment)
-            iter++
+//            val bigSegment: Segment = makeBigSegment(turnPoints[iter -1], turnPoints[iter])
+//            val segments: List<TrackPartInSingleCell> = splitSegment(bigSegment)
+//            resultSplitted = distributeSegments(resultSplitted, segments)
+//            //resultSplitted.plusSplitted(distributedByCellsSegment)
+//            iter++
         }
         return resultSplitted
 
@@ -104,18 +111,20 @@ class TracksGirdCalculator(
         startCell: CoordinatesOfCell,
         splittingSegment: Segment,
         listForResult: MutableList<TrackPartInSingleCell>): MutableList<TrackPartInSingleCell> {
-        var seriesStart = CellLocation(x = splittingSegment.startCellLocation.x, y = splittingSegment.startCellLocation.y)
+
         var transitionTo = TransitionManager(cellSize).getTransitionTo( // преверяем на наличие перехода
             splittingSegment.startCellLocation,
             splittingSegment.endSegmentCellLocation)
-        val singleTrackPart = TrackPartInSingleCell(startCell,
+
+        if (transitionTo == TransitionTo.NONE) listForResult.add(TrackPartInSingleCell(startCell,
             mutableListOf(
-                seriesStart,
-                CellLocation(x = splittingSegment.endSegmentCellLocation.x, y = splittingSegment.endSegmentCellLocation.y) ))
-        if (transitionTo == TransitionTo.NONE) listForResult.add(singleTrackPart)
+                splittingSegment.startCellLocation,
+                splittingSegment.endSegmentLocation )))
+
         else {
             val nextCell = NextCellNumber().get(cellNumber = startCell, transitionTo = transitionTo)
-            val transitionPoints = CellTransitionByEnum(cellSize).getTransitionPoints(
+
+            val transitionPoints = CellTransitionByEnum(cellSize, logger).getTransitionPoints(
                 transitionTo = transitionTo,
                 startCellLocation = splittingSegment.startCellLocation,
                 endCellLocation = splittingSegment.endSegmentCellLocation)
@@ -156,7 +165,7 @@ class TracksGirdCalculator(
         val nextCellNumber = NextCellNumber().get(
             cellNumber = segmentStartCell,
             transitionTo = transitionTo)
-        val transitionPoints = CellTransitionByEnum(cellSize).getTransitionPoints(
+        val transitionPoints = CellTransitionByEnum(cellSize, logger).getTransitionPoints(
             transitionTo = transitionTo,
             startCellLocation = currentSegment.startCellLocation,
             endCellLocation = currentSegment.endSegmentCellLocation)

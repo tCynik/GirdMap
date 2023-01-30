@@ -30,7 +30,11 @@ class SplittedByCellsTrack() {
         return  cellData[index].track
     }
 
-    fun toString(): String {
-        // возвращаем в формате: ячейкаX:Y - точкаX:Y; точкаX:Y; ... точкаX:Y перенос строки
+    override fun toString(): String {
+        val resultString: String = ""
+//        cellData.forEach {  }
+//        val cell = cellData.
+        return resultString
+        //todo: возвращаем в формате: ячейкаX:Y - точкаX:Y; точкаX:Y; ... точкаX:Y перенос строки
     }
 }
