@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.lessongirdrecycler.domain.Logger
 import com.example.lessongirdrecycler.domain.coordinates_calculator.gird_transition.TransitionTo
 import com.example.lessongirdrecycler.domain.models.cell.CellLocation
+import kotlin.math.abs
 
 class CellTransitionByEnum(val cellSize: Int, val logger: Logger) {
     fun getTransitionPoints(
@@ -23,19 +24,25 @@ class CellTransitionByEnum(val cellSize: Int, val logger: Logger) {
             }
 
             TransitionTo.NE -> {
-                val rateToSegmentEnd = endSegmentLocation.x/endSegmentLocation.y
-                val rateToCellCorner = (cellSize - startCellLocation.x)/startCellLocation.y
-                if (rateToSegmentEnd > rateToCellCorner) { // через верхнюю сторону -> считаем от Y
+                logger.printLog("calculating NE. start = $startCellLocation, end = $endSegmentLocation")
+                val rateToSegmentEnd = abs(endSegmentLocation.x*100/endSegmentLocation.y).toDouble()/100
+                val rateToCellCorner = abs(cellSize - startCellLocation.x)*100/startCellLocation.y.toDouble()/100
+                logger.printLog("rateToSegmentEnd = $rateToSegmentEnd, rateToCellCorner = $rateToCellCorner, rate is less = ${rateToSegmentEnd > rateToCellCorner}")
+                if (rateToSegmentEnd < rateToCellCorner) { // через верхнюю сторону -> считаем от Y
                     // находим неполную сторону (тут это Х) через пропорцию подобных треугольников
                     // сколько осталось от неполной стороны = сколько уже есть + сколько надо пройти: Х = Хнач + Хост
                     // сколько надо пройти = остаток * пропорция: Xост = К * Xвсг
                     // пропорция = "сколько всего"/"сколько осталось до границы": К = Yост / Yвсг
                     // итого: Х = Хнач + Хвсг * (Yост / Yвсг)
-                    transitionLocations.add(CellLocation(x = calculateByX(startCellLocation, endSegmentLocation), y = 0))
-                    transitionLocations.add(CellLocation(x = calculateByX(startCellLocation, endSegmentLocation), y = cellSize))
-                } else if (rateToSegmentEnd < rateToCellCorner) { // через правую сторону
-                    transitionLocations.add(CellLocation(x = cellSize, y = calculateByY(startCellLocation, endSegmentLocation)))
-                    transitionLocations.add(CellLocation(x = 0, y = calculateByY(startCellLocation, endSegmentLocation)))
+                    val calculatedX = calculateByX(startCellLocation, endSegmentLocation) + startCellLocation.x
+                    logger.printLog("calc by top. start = $startCellLocation, end = $endSegmentLocation, calcByX  = $calculatedX")
+                    transitionLocations.add(CellLocation(x = calculatedX, y = 0))
+                    transitionLocations.add(CellLocation(x = calculatedX, y = cellSize))
+                } else if (rateToSegmentEnd > rateToCellCorner) { // через правую сторону
+                    val calculatedY = calculateByY(startCellLocation, endSegmentLocation)
+                    logger.printLog("calc by right. start = $startCellLocation, end = $endSegmentLocation, calcByY = $calculatedY")
+                    transitionLocations.add(CellLocation(x = cellSize, y = calculatedY))
+                    transitionLocations.add(CellLocation(x = 0, y = calculatedY))
                 } else { // через угол
                     transitionLocations.add(CellLocation(x = cellSize, y = 0))
                     transitionLocations.add(CellLocation(x = 0, y = 0))
@@ -116,10 +123,12 @@ class CellTransitionByEnum(val cellSize: Int, val logger: Logger) {
     }
 
     private fun calculateByX(startCellLocation: CellLocation, endSegmentLocation: CellLocation): Int {
+        logger.printLog("(start.y'${startCellLocation.y}' * endX'${endSegmentLocation.x}' / endY'${endSegmentLocation.y}') + startX'${startCellLocation.x}'")
         return (startCellLocation.y*endSegmentLocation.x/endSegmentLocation.y) + startCellLocation.x
     }
 
     private fun calculateByY(startCellLocation: CellLocation, endSegmentLocation: CellLocation): Int {
+        logger.printLog("(startX'${startCellLocation.x}' * endY'${endSegmentLocation.y}' / endX'${endSegmentLocation.x}') + startY'${startCellLocation.y}'")
         return (startCellLocation.x*endSegmentLocation.y/endSegmentLocation.x) + startCellLocation.y
     }
 }
