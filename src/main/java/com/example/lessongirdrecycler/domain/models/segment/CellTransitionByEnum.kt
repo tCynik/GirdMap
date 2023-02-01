@@ -80,15 +80,21 @@ class CellTransitionByEnum(val cellSize: Int, val logger: Logger) {
             }
 
             TransitionTo.SW -> {
-                val rateToSegmentEnd = endSegmentLocation.x/endSegmentLocation.y
-                val rateToCellCorner = startCellLocation.x/(cellSize - startCellLocation.y)
-                if (rateToSegmentEnd < rateToCellCorner) { // calculating y
-                    transitionLocations.add(CellLocation(x = 0, y = calculateByY(startCellLocation, endSegmentLocation)))
-                    transitionLocations.add(CellLocation(x = cellSize, y = calculateByY(startCellLocation, endSegmentLocation)))
-                } else if (rateToSegmentEnd > rateToCellCorner) { // calculating X
-                    transitionLocations.add(CellLocation(x = calculateByX(startCellLocation, endSegmentLocation), y = cellSize))
-                    transitionLocations.add(CellLocation(x = calculateByX(startCellLocation, endSegmentLocation), y = 0))
+                val rateToSegmentEnd = abs(endSegmentLocation.x*100/endSegmentLocation.y/100)
+                val rateToCellCorner = abs(startCellLocation.x*100/(cellSize - startCellLocation.y)/100)
+
+                if (rateToSegmentEnd > rateToCellCorner) { // calculating y
+                    val calculatedY = calculateByY(startCellLocation, endSegmentLocation) + startCellLocation.y
+                    logger.printLog("SW. rate is less then corner. calculated Y = $calculatedY")
+                    transitionLocations.add(CellLocation(x = 0, y = calculatedY))
+                    transitionLocations.add(CellLocation(x = cellSize, y = calculatedY))
+                } else if (rateToSegmentEnd < rateToCellCorner) { // calculating X
+                    val calculatedX = calculateByX(startCellLocation, endSegmentLocation)
+                    logger.printLog("SW. rate is more then corner. calculating X = $calculatedX")
+                    transitionLocations.add(CellLocation(x = calculatedX, y = cellSize))
+                    transitionLocations.add(CellLocation(x = calculatedX, y = 0))
                 } else {
+                    logger.printLog("crossing SW corner")
                     transitionLocations.add(CellLocation(x = 0, y = cellSize))
                     transitionLocations.add(CellLocation(x = cellSize, y = 0))
                 }
@@ -123,12 +129,29 @@ class CellTransitionByEnum(val cellSize: Int, val logger: Logger) {
     }
 
     private fun calculateByX(startCellLocation: CellLocation, endSegmentLocation: CellLocation): Int {
-        logger.printLog("(start.y'${startCellLocation.y}' * endX'${endSegmentLocation.x}' / endY'${endSegmentLocation.y}') + startX'${startCellLocation.x}'")
+        val result = (startCellLocation.y*endSegmentLocation.x/endSegmentLocation.y) + startCellLocation.x
+        logger.printLog("calc by X = (start.y'${startCellLocation.y}' * endX'${endSegmentLocation.x}' / endY'${endSegmentLocation.y}') + startX'${startCellLocation.x}' = $result")
         return (startCellLocation.y*endSegmentLocation.x/endSegmentLocation.y) + startCellLocation.x
     }
 
     private fun calculateByY(startCellLocation: CellLocation, endSegmentLocation: CellLocation): Int {
-        logger.printLog("(startX'${startCellLocation.x}' * endY'${endSegmentLocation.y}' / endX'${endSegmentLocation.x}') + startY'${startCellLocation.y}'")
+        val result = abs(startCellLocation.x*endSegmentLocation.y/endSegmentLocation.x) + startCellLocation.y
+        logger.printLog("calc by Y = (startX'${startCellLocation.x}' * endY'${endSegmentLocation.y}' / endX'${endSegmentLocation.x}') + startY'${startCellLocation.y}' = $result")
         return (startCellLocation.x*endSegmentLocation.y/endSegmentLocation.x) + startCellLocation.y
+    }
+
+    private fun calculateSWByY(startCellLocation: CellLocation, endSegmentLocation: CellLocation): Int {
+        val rate: Double =  (startCellLocation.x * 100 / abs(endSegmentLocation.x)).toDouble() / 100
+        val shift: Double = endSegmentLocation.y * rate
+        logger.printLog("rate = $rate, shift = $shift")
+        val result = startCellLocation.y + (endSegmentLocation.y * (startCellLocation.x *100 / abs(endSegmentLocation.x))/100)
+        logger.printLog("Y result = startY'${startCellLocation.y}' + (endY'${endSegmentLocation.y}' * (startX'${startCellLocation.x}' / abs(endX)'${endSegmentLocation.x}')) = $result")
+        return result
+    }
+
+    private fun calculateSWByX(startCellLocation: CellLocation, endSegmentLocation: CellLocation): Int {
+        val result = (startCellLocation.y*endSegmentLocation.x/endSegmentLocation.y) + startCellLocation.x
+        logger.printLog("calc SW by Y = (start.y'${startCellLocation.y}' * endX'${endSegmentLocation.x}' / endY'${endSegmentLocation.y}') + startX'${startCellLocation.x}' = $result")
+        return (startCellLocation.y*endSegmentLocation.x/endSegmentLocation.y) + startCellLocation.x
     }
 }
