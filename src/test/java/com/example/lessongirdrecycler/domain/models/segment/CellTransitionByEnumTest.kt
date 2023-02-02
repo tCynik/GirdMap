@@ -101,7 +101,7 @@ internal class CellTransitionByEnumTest {
 
     // SW
     @Test
-    fun transitionSWMore45() { // calc by left
+    fun transitionSWMore45() { // calc by side
         val transitionLocations = calculateTransition(transitionTo = TransitionTo.SW, x = -50, y = 100)
         val currentExpected = CellLocation(0, 75)
         val nextExpected = CellLocation(100, 75)
@@ -117,13 +117,48 @@ internal class CellTransitionByEnumTest {
     }
 
     @Test
-    fun transitionSWLess45() { // calc by top
+    fun transitionSWLess45() { // calc by bottom
         val transitionLocations = calculateTransition(transitionTo = TransitionTo.SW, x = 0, y = 150)
-        val currentExpected = CellLocation(75, 0)
-        val nextExpected = CellLocation(75, 100)
+        val currentExpected = CellLocation(25, 100)
+        val nextExpected = CellLocation(25, 0)
         Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
     }
 
+    //NW
+    @Test
+    fun transitionNWMore45() { // calc by top
+        val transitionLocations = calculateTransition(transitionTo = TransitionTo.NW, x = 0, y = -50)
+        val currentExpected = CellLocation(25, 0)
+        val nextExpected = CellLocation(25, 100)
+        Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
+    }
+
+    @Test
+    fun transitionNW45() {
+        val transitionLocations = calculateTransition(transitionTo = TransitionTo.NW, x = -50, y = -50)
+        val currentExpected = CellLocation(0, 0)
+        val nextExpected = CellLocation(100, 100)
+        Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
+    }
+
+    @Test
+    fun transitionNWLess45() { // calc by side
+        val transitionLocations = calculateTransition(transitionTo = TransitionTo.NW, x = -50, y = 0)
+        val currentExpected = CellLocation(0, 25)
+        val nextExpected = CellLocation(100, 25)
+        Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
+    }
+
+    @Test
+    fun startByZero() {
+        val transitionLocations = cellTransitionCalculator.getTransitionPoints(
+            transitionTo = TransitionTo.NW,
+            startCellLocation = CellLocation(0, 0),
+            endCellLocation = CellLocation(-50, -50))
+        val currentExpected = CellLocation(0, 0)
+        val nextExpected = CellLocation(100, 100)
+        Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
+    }
 
     // todo: need to test transition from current_zero
 
