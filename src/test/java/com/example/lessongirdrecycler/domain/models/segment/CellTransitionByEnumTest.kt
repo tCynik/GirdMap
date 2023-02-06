@@ -12,8 +12,8 @@ internal class CellTransitionByEnumTest {
             println(logMessage)
         }
     }
-
-    val cellTransitionCalculator = CellTransitionByEnum(100, logger)
+    val cellSize = 100
+    val cellTransitionCalculator = CellTransitionByEnum(cellSize, logger)
     val startCellLocation = CellLocation(50, 50)
 
     // directly one axis transitions
@@ -149,8 +149,112 @@ internal class CellTransitionByEnumTest {
         Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
     }
 
+// Start from the cell side to outside one cases tests
+    // NE
     @Test
-    fun startByZero() {
+    fun fromCornerNE() {
+        val transitionLocations = cellTransitionCalculator.getTransitionPoints(
+            transitionTo = TransitionTo.NE,
+            startCellLocation = CellLocation(cellSize, 0),
+            endCellLocation = CellLocation(50, -50))
+        val currentExpected = CellLocation(100, 0)
+        val nextExpected = CellLocation(0, 100)
+        Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
+    }
+
+    @Test
+    fun fromTopNE() {
+        val transitionLocations = cellTransitionCalculator.getTransitionPoints(
+            transitionTo = TransitionTo.NE,
+            startCellLocation = CellLocation(50, 0),
+            endCellLocation = CellLocation(100, -50))
+        val currentExpected = CellLocation(50, 0)
+        val nextExpected = CellLocation(50, 100)
+        Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
+    }
+
+    @Test
+    fun fromSideNE() {
+        val transitionLocations = cellTransitionCalculator.getTransitionPoints(
+            transitionTo = TransitionTo.NE,
+            startCellLocation = CellLocation(100, 50),
+            endCellLocation = CellLocation(150, -50))
+        val currentExpected = CellLocation(100, 50)
+        val nextExpected = CellLocation(0, 50)
+        Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
+    }
+
+    // SE
+    @Test
+    fun fromCornerSE() {
+        val transitionLocations = cellTransitionCalculator.getTransitionPoints(
+            transitionTo = TransitionTo.SE,
+            startCellLocation = CellLocation(cellSize, cellSize),
+            endCellLocation = CellLocation(150, 150))
+        val currentExpected = CellLocation(100, 100)
+        val nextExpected = CellLocation(0, 0)
+        Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
+    }
+
+    @Test
+    fun fromBottomSE() {
+        val transitionLocations = cellTransitionCalculator.getTransitionPoints(
+            transitionTo = TransitionTo.SE,
+            startCellLocation = CellLocation(50, 100),
+            endCellLocation = CellLocation(100, 150))
+        val currentExpected = CellLocation(50, 100)
+        val nextExpected = CellLocation(50, 0)
+        Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
+    }
+
+    @Test
+    fun fromSideSE() {
+        val transitionLocations = cellTransitionCalculator.getTransitionPoints(
+            transitionTo = TransitionTo.SE,
+            startCellLocation = CellLocation(100, 50),
+            endCellLocation = CellLocation(150, 100))
+        val currentExpected = CellLocation(100, 50)
+        val nextExpected = CellLocation(0, 50)
+        Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
+    }
+
+    //SW
+    @Test
+    fun fromCornerSW() {
+        val transitionLocations = cellTransitionCalculator.getTransitionPoints(
+            transitionTo = TransitionTo.SW,
+            startCellLocation = CellLocation(0, cellSize),
+            endCellLocation = CellLocation(-50, 150))
+        val currentExpected = CellLocation(0, 100)
+        val nextExpected = CellLocation(100, 0)
+        Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
+    }
+
+    @Test
+    fun fromBottomSW() {
+        val transitionLocations = cellTransitionCalculator.getTransitionPoints(
+            transitionTo = TransitionTo.SW,
+            startCellLocation = CellLocation(50, 100),
+            endCellLocation = CellLocation(0, 150))
+        val currentExpected = CellLocation(50, 100)
+        val nextExpected = CellLocation(50, 0)
+        Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
+    }
+
+    @Test
+    fun fromSideSW() {
+        val transitionLocations = cellTransitionCalculator.getTransitionPoints(
+            transitionTo = TransitionTo.SW,
+            startCellLocation = CellLocation(0, 50),
+            endCellLocation = CellLocation(-50, 100))
+        val currentExpected = CellLocation(0, 50)
+        val nextExpected = CellLocation(100, 50)
+        Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
+    }
+
+    // NW
+    @Test
+    fun fromCornerNW() {
         val transitionLocations = cellTransitionCalculator.getTransitionPoints(
             transitionTo = TransitionTo.NW,
             startCellLocation = CellLocation(0, 0),
@@ -160,8 +264,27 @@ internal class CellTransitionByEnumTest {
         Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
     }
 
-    // todo: need to test transition from current_zero
+    @Test
+    fun fromTopNW() {
+        val transitionLocations = cellTransitionCalculator.getTransitionPoints(
+            transitionTo = TransitionTo.NW,
+            startCellLocation = CellLocation(50, 0),
+            endCellLocation = CellLocation(0, -50))
+        val currentExpected = CellLocation(50, 0)
+        val nextExpected = CellLocation(50, 100)
+        Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
+    }
 
+    @Test
+    fun fromSideNW() {
+        val transitionLocations = cellTransitionCalculator.getTransitionPoints(
+            transitionTo = TransitionTo.NW,
+            startCellLocation = CellLocation(0, 50),
+            endCellLocation = CellLocation(-50, 0))
+        val currentExpected = CellLocation(0, 50)
+        val nextExpected = CellLocation(100, 50)
+        Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
+    }
 
 
     private fun calculateTransition(transitionTo: TransitionTo, x: Int, y: Int): List<CellLocation> {
