@@ -31,8 +31,8 @@ class TracksGirdCalculator(
         override fun printLog(logMessage: String) {
             Log.i("bugfix: Calculator", logMessage)
         }
-
     }
+
     var splittedByCellsTrack: SplittedByCellsTrack = SplittedByCellsTrack()
 
     fun splitGlobalTrackToCells(track: GlobalTrack): SplittedByCellsTrack {
@@ -48,59 +48,33 @@ class TracksGirdCalculator(
         var resultSplitted = SplittedByCellsTrack()
         val turnPoints = track.turnPoints
         turnPoints.forEach{ point -> point.print(point)}
+        var listForResult = mutableListOf<TrackPartInSingleCell>()
+        logger.printLog("starting to split the segment, size of track = ${turnPoints.size}")
         var iter = 1
         while (iter < turnPoints.size) { // перебор точек трека
-//            val bigSegment: Segment = makeBigSegment(turnPoints[iter -1], turnPoints[iter])
-//            val segments: List<TrackPartInSingleCell> = splitSegment(bigSegment)
-//            resultSplitted = distributeSegments(resultSplitted, segments)
-//            //resultSplitted.plusSplitted(distributedByCellsSegment)
-//            iter++
+            val currentPoint = turnPoints[iter -1]
+            val nextPoint = turnPoints[iter]
+            currentCell = cellCoordinates(currentPoint)
+            logger.printLog("spliting iter = $iter, cell = $currentCell currentPoint = $currentPoint, next point = $nextPoint ")
+            val currentSegment: Segment = makeBigSegment(currentPoint, nextPoint)
+            listForResult = splitSegment(
+                startCell = currentCell,
+                splittingSegment = currentSegment,
+                listForResult = listForResult)
+            //resultSplitted = distributeSegments(resultSplitted, segments)
+            iter++
         }
+        logger.printLog("splitting ended, splitted size = ${listForResult.size}")
+
+        listForResult.forEach { cellTrackPart ->
+            logger.printLog("splitting Segment. cell = ${cellTrackPart.cell}, segment coordinates = ${cellTrackPart.track[0]}-${cellTrackPart.track[1]}") }
+        resultSplitted.cellData = listForResult
         return resultSplitted
-
-
-//        // старый код
-//        splittedByCellsTrack.addLocation(coordinatesOfCell = currentCell, cellLocation = firstTurnPoint)
-//
-//        var i = 1
-//        while (i < track.turnPoints.size) {
-//            val currentTurnPoint = track.turnPoints[i-1]
-//            val nextTurnPoint = track.turnPoints[i]
-//
-//            val segmentStartCell = cellCoordinates(currentTurnPoint)
-//
-//            var currentSegment = Segment( // берём текущий сегмент с системе координат стартовой его ячейки
-//                cellSize = cellSize,
-//                startCellLocation = coordinatesInsideCellByGlobal(currentTurnPoint, segmentStartCell),
-//                endSegmentCellLocation = coordinatesInsideCellByGlobal(nextTurnPoint, segmentStartCell))
-//
-//            if (segmentStartCell.equals(cellCoordinates(nextTurnPoint))) { // если конец сегмента в этой же ячейке
-//                splittedByCellsTrack.addLocation(coordinatesOfCell = segmentStartCell, cellLocation = currentSegment.endSegmentCellLocation)
-//            } else { // либо если сегмент придется разбивать
-//                var transitionTo = TransitionManager(cellSize).getTransitionTo(
-//                    currentSegment.startCellLocation,
-//                    currentSegment.endSegmentCellLocation)
-//                var nextCellNumber = NextCellNumber().get(
-//                    cellNumber = segmentStartCell,
-//                    transitionTo = transitionTo)
-//
-//                while (transitionTo != TransitionTo.NONE) {
-//                    transitionTo = processingTransition(
-//                        segmentStartCell = segmentStartCell,
-//                        currentSegment = currentSegment)
-//                    Log.i("bugfix: calculator", "next transitionTo = $transitionTo")
-//
-//                }
-//                splittedByCellsTrack.addLocation(coordinatesOfCell = nextCellNumber, cellLocation = currentSegment.endSegmentLocation)
-//            }
-//            i++
-//        }
-//        Log.i("bugfix: calculator", "track was splitted:")
-//        splittedByCellsTrack.cellData.forEach{trackInCell -> Log.i("bugfix", "cell#: ${trackInCell.cell} , start: ${trackInCell.track[0]}, end: ${trackInCell.track[trackInCell.track.size -1]}")}
-//        return splittedByCellsTrack
     }
 
-    private fun makeBigSegment(currentPoint: GlobalTurnPoint, nextTurnPoint: GlobalTurnPoint): Segment {
+    private fun makeBigSegment( // разбитие трека на сегменты по поворотам
+        currentPoint: GlobalTurnPoint,
+        nextTurnPoint: GlobalTurnPoint): Segment {
         val cell = cellCoordinatesFromStart(currentPoint)
         val currentCoordinatrs = coordinatesInsideCellByGlobal(currentPoint, cell)
         val nextCoordinates = coordinatesInsideCellByGlobal(nextTurnPoint, cell)
@@ -131,7 +105,7 @@ class TracksGirdCalculator(
             val nextSegment = Segment(cellSize = cellSize,
                 startCellLocation = transitionPoints[0],
                 endSegmentCellLocation = splittingSegment.endSegmentCellLocation) // todo: ошибка в логике
-            // мф переходим в новую ячейку, и для неё у нас те же самые координаты конца?
+            // мы переходим в новую ячейку, и для неё у нас те же самые координаты конца?
             // В таком случае рекурсия никогда не закончится
             // типа выходит, нужно пересчитывать координаты конца под новую ячейку?
 
