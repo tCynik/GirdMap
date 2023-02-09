@@ -2,26 +2,28 @@ package com.example.lessongirdrecycler.domain.coordinates_calculator.gird_transi
 
 import com.example.lessongirdrecycler.domain.models.cell.CellLocation
 
-class TransitionManager(val cellSize: Int) {
+class TransitionManager(private val cellSize: Int) {
 
     fun getTransitionTo(coordinatesInCell: CellLocation, relativeCoordinatesNext:CellLocation): TransitionTo {
         val relativeXFromTopStart = coordinatesInCell.x + relativeCoordinatesNext.x
         val relativeYFromTopStart = coordinatesInCell.y + relativeCoordinatesNext.y
+        var transitionTo = TransitionTo.NONE
 
-        if (relativeXFromTopStart < 0) { // ГОРИЗОНТАЛЬНОЕ смещение влево...
-            if (relativeYFromTopStart < 0) return TransitionTo.NW // и ВЕРТИКАЛЬНОЕ вверх
-            else if (relativeYFromTopStart > cellSize) return TransitionTo.SW // и ВЕРТИКАЛЬНОЕ вниз
-            else return TransitionTo.WEST // только влево, и всё
-        }
-        else if (relativeXFromTopStart > cellSize) {// ГОРИЗОНТАЛЬНОЕ смещение вправо...
-            if (relativeYFromTopStart < 0) return TransitionTo.NE // и ВЕРТИКАЛЬНОЕ вверх
-            else if (relativeYFromTopStart > cellSize) return TransitionTo.SE // и ВЕРТИКАЛЬНОЕ вниз
-            else return TransitionTo.EAST // либо только вправо
-        }
-        else { // тибо ГОРИЗОНТАЛЬНОГО смещения нет, и
-            if (relativeYFromTopStart < 0) return TransitionTo.NORTH // ВЕРТИКАЛЬНОЕ вверх
-            else if (relativeYFromTopStart > cellSize) return TransitionTo.SOUTH // ВЕРТИКАЛЬНОЕ вниз
-            else return TransitionTo.NONE // вертикального тоже нет
-        }
+        if (relativeXFromTopStart < 0) transitionTo = TransitionTo.WEST
+        else if (relativeXFromTopStart > cellSize) transitionTo = TransitionTo.EAST
+
+        if (relativeYFromTopStart < 0)
+            transitionTo = when (transitionTo) {
+                TransitionTo.WEST -> TransitionTo.NW
+                TransitionTo.EAST -> TransitionTo.NE
+                else -> TransitionTo.NORTH
+            }
+        else if (relativeYFromTopStart > cellSize)
+            transitionTo = when (transitionTo) {
+                TransitionTo.WEST -> TransitionTo.SW
+                TransitionTo.EAST -> TransitionTo.SE
+                else -> TransitionTo.SOUTH
+            }
+        return transitionTo
     }
 }

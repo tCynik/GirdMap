@@ -40,18 +40,20 @@ class TrackSplitter (
         val turnPoints = track.turnPoints
         turnPoints.forEach{point -> point.print(point)}
         var listForResult = mutableListOf<TrackPartInSingleCell>()
-        logger.printLog("starting to split the segment, size of track = ${turnPoints.size}")
+        logger.printLog("starting to split the track, size of track = ${turnPoints.size}")
 
         var iter = 1
         while (iter < turnPoints.size) { // перебор точек трека
             val currentPoint = turnPoints[iter -1]
             val nextPoint = turnPoints[iter]
             currentCell = cellCoordinates(currentPoint)
-            logger.printLog("spliting iter = $iter, cell = $currentCell currentPoint = $currentPoint, next point = $nextPoint ")
             val currentSegment = Segment(
                 cellSize = cellSize,
                 startCellLocation = coordinatesInsideCellByGlobal(currentPoint, currentCell),
                 endSegmentCellLocation = coordinatesInsideCellByGlobal(nextPoint, currentCell))//makeBigSegment(currentPoint, nextPoint)
+            logger.printLog("next global point = $nextPoint, local = ${coordinatesInsideCellByGlobal(nextPoint, currentCell)}, segment = $currentSegment")
+            logger.printLog("spliting iter = $iter, cell = $currentCell currentPoint = $currentPoint, next point = $nextPoint, making the segment= ${currentSegment} ")
+
             listForResult = splitSegment(
                 startCell = currentCell,
                 splittingSegment = currentSegment,
@@ -73,8 +75,7 @@ class TrackSplitter (
         startCell: CoordinatesOfCell,
         splittingSegment: Segment,
         listForResult: MutableList<TrackPartInSingleCell>): MutableList<TrackPartInSingleCell> {
-
-        var transitionTo = TransitionManager(cellSize).getTransitionTo( // преверяем на наличие перехода
+        val transitionTo = TransitionManager(cellSize).getTransitionTo( // преверяем на наличие перехода
             splittingSegment.startCellLocation,
             splittingSegment.endSegmentCellLocation)
 
@@ -90,13 +91,14 @@ class TrackSplitter (
                 transitionTo = transitionTo,
                 startCellLocation = splittingSegment.startCellLocation,
                 endCellLocation = splittingSegment.endSegmentCellLocation)
-            val nextSegment = Segment(cellSize = cellSize,
-                startCellLocation = transitionPoints[0],
-                endSegmentCellLocation = splittingSegment.endSegmentCellLocation) // todo: ошибка в логике
-            // мы переходим в новую ячейку, и для неё у нас те же самые координаты конца?
-            // В таком случае рекурсия никогда не закончится
-            // типа выходит, нужно пересчитывать координаты конца под новую ячейку?
+            logger.printLog("calc transition points: transTo = $transitionTo, start = ${splittingSegment.startCellLocation}, end = ${splittingSegment.endSegmentCellLocation}" +
+                    ", result = $transitionPoints")
 
+            val nextSegment = splittingSegment.getCutted(transitionPoints[1])
+            listForResult.add(TrackPartInSingleCell( cell = nextCell, mutableListOf(
+                splittingSegment.startCellLocation, transitionPoints[0])))
+            logger.printLog("making next segment: change start: ${splittingSegment.startCellLocation} to ${transitionPoints[0]}, end: ${splittingSegment.endSegmentLocation} to ${nextSegment.endSegmentLocation}")
+            logger.printLog("make recursion slitting. Next segment = $nextSegment \n")
             splitSegment(startCell = nextCell, splittingSegment = nextSegment, listForResult = listForResult)
         }
 

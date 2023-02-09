@@ -13,7 +13,22 @@ class Segment (val cellSize: Int,
             y = endSegmentCellLocation.y - startCellLocation.y)
     }
 
+    override fun toString(): String {
+        return "start: $startCellLocation, end: $endSegmentLocation"
+    }
+
+    fun getCutted(nextStartLocation: CellLocation): Segment{
+        val deltaX = nextStartLocation.x - startCellLocation.x
+        val deltay = nextStartLocation.y - startCellLocation.y
+        val nextEnd = CellLocation(
+            x = endSegmentLocation.x + deltaX,
+            y= endSegmentLocation.y + deltay)
+        return Segment(cellSize = cellSize, startCellLocation = nextStartLocation, endSegmentCellLocation = nextEnd)
+
+    }
+
     fun cutOne(nextStartLocation: CellLocation, transitionTo: TransitionTo) { // todo: delete?
+
         when(transitionTo) {
             TransitionTo.NORTH -> {
                 endSegmentLocation = CellLocation(
@@ -59,6 +74,7 @@ class Segment (val cellSize: Int,
         }
 
         startCellLocation = nextStartLocation
+        return
     }
 
     fun makeCutSegment(nextStartLocation: CellLocation, transitionTo: TransitionTo): Segment {
