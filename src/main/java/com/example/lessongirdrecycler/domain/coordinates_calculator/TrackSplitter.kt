@@ -1,6 +1,5 @@
 package com.example.lessongirdrecycler.domain.coordinates_calculator
 
-import android.util.Log
 import com.example.lessongirdrecycler.domain.Logger
 import com.example.lessongirdrecycler.domain.coordinates_calculator.gird_transition.NextCellNumber
 import com.example.lessongirdrecycler.domain.coordinates_calculator.gird_transition.TransitionManager
@@ -36,6 +35,7 @@ class TrackSplitter (
         // Если по дороге переход в другую ячейку, находим пограничные координаты для обеих ячеек
         // для каждой ячейки находим местный трек (GirdTrack)
         var currentCell = cellCoordinates(track.turnPoints[0])
+        logger.printLog("first time cell = $currentCell")
 
         val turnPoints = track.turnPoints
         turnPoints.forEach{point -> point.print(point)}
@@ -47,14 +47,16 @@ class TrackSplitter (
             val currentPoint = turnPoints[iter -1]
             val nextPoint = turnPoints[iter]
             currentCell = cellCoordinates(currentPoint)
+            logger.printLog("current iterCell = $currentCell")
+
             val currentSegment = Segment(
                 cellSize = cellSize,
                 startCellLocation = coordinatesInsideCellByGlobal(currentPoint, currentCell),
-                endSegmentCellLocation = coordinatesInsideCellByGlobal(nextPoint, currentCell))//makeBigSegment(currentPoint, nextPoint)
+                endCellLocation = coordinatesInsideCellByGlobal(nextPoint, currentCell))//makeBigSegment(currentPoint, nextPoint)
             logger.printLog("next global point = $nextPoint, local = ${coordinatesInsideCellByGlobal(nextPoint, currentCell)}, segment = $currentSegment")
             logger.printLog("spliting iter = $iter, cell = $currentCell currentPoint = $currentPoint, next point = $nextPoint, making the segment= ${currentSegment} ")
 
-            listForResult = splitSegment(
+            listForResult = distributeSegmentToCells(
                 startCell = currentCell,
                 splittingSegment = currentSegment,
                 listForResult = listForResult)
@@ -63,21 +65,25 @@ class TrackSplitter (
         }
         logger.printLog("splitting ended, splitted size = ${listForResult.size}")
 
-        listForResult.forEach { cellTrackPart ->
-            logger.printLog("splitting Segment. cell = ${cellTrackPart.cell}, segment coordinates = ${cellTrackPart.track[0]}-${cellTrackPart.track[1]}") }
+        printList(listForResult)
 
-        var resultSplitted = SplittedByCellsTrack()
+        val resultSplitted = SplittedByCellsTrack()
         resultSplitted.cellData = listForResult
         return resultSplitted
     }
 
-    private fun splitSegment(
+    private fun printList(listToPrint: List<TrackPartInSingleCell>) {
+        listToPrint.forEach { cellTrackPart ->
+            logger.printLog("splitting Segment. cell = ${cellTrackPart.cell}, segment coordinates = ${cellTrackPart.track[0]} ${cellTrackPart.track[1]}") }
+    }
+
+    private fun distributeSegmentToCells(
         startCell: CoordinatesOfCell,
         splittingSegment: Segment,
         listForResult: MutableList<TrackPartInSingleCell>): MutableList<TrackPartInSingleCell> {
         val transitionTo = TransitionManager(cellSize).getTransitionTo( // преверяем на наличие перехода
             splittingSegment.startCellLocation,
-            splittingSegment.endSegmentCellLocation)
+            splittingSegment.endCellLocation)
 
         if (transitionTo == TransitionTo.NONE) listForResult.add(TrackPartInSingleCell(startCell,
             mutableListOf(
@@ -85,23 +91,43 @@ class TrackSplitter (
                 splittingSegment.endSegmentLocation )))
 
         else {
-            val nextCell = NextCellNumber().get(cellNumber = startCell, transitionTo = transitionTo)
-
-            val transitionPoints = CellTransitionByEnum(cellSize, TracksGirdCalculator).getTransitionPoints(
-                transitionTo = transitionTo,
-                startCellLocation = splittingSegment.startCellLocation,
-                endCellLocation = splittingSegment.endSegmentCellLocation)
-            logger.printLog("calc transition points: transTo = $transitionTo, start = ${splittingSegment.startCellLocation}, end = ${splittingSegment.endSegmentCellLocation}" +
-                    ", result = $transitionPoints")
-
-            val nextSegment = splittingSegment.getCutted(transitionPoints[1])
-            listForResult.add(TrackPartInSingleCell( cell = nextCell, mutableListOf(
-                splittingSegment.startCellLocation, transitionPoints[0])))
-            logger.printLog("making next segment: change start: ${splittingSegment.startCellLocation} to ${transitionPoints[0]}, end: ${splittingSegment.endSegmentLocation} to ${nextSegment.endSegmentLocation}")
-            logger.printLog("make recursion slitting. Next segment = $nextSegment \n")
-            splitSegment(startCell = nextCell, splittingSegment = nextSegment, listForResult = listForResult)
+            var splittedList = mutableListOf<TrackPartInSingleCell>()
+            splittedList = splitSegment(startCell = startCell, splittingSegment = splittingSegment, listForResult = splittedList, transitionTo = transitionTo)
+            listForResult.addAll(splittedList)
         }
 
+        return listForResult
+    }
+
+    private fun splitSegment(
+        startCell: CoordinatesOfCell,
+        splittingSegment: Segment,
+        listForResult: MutableList<TrackPartInSingleCell>,
+        transitionTo: TransitionTo): MutableList<TrackPartInSingleCell> {
+
+        val nextCell = NextCellNumber().get(cellNumber = startCell, transitionTo = transitionTo)
+
+        val transitionPoints = CellTransitionByEnum(cellSize, TracksGirdCalculator).getTransitionPoints(
+            transitionTo = transitionTo,
+            startCellLocation = splittingSegment.startCellLocation,
+            endCellLocation = splittingSegment.endCellLocation)
+        logger.printLog("calc transition points: transTo = $transitionTo, start = ${splittingSegment.startCellLocation}, end = ${splittingSegment.endCellLocation}" +
+                ", result = $transitionPoints")
+
+        val nextSegment = splittingSegment.getCutted(transitionPoints[0], transitionPoints[1])
+        listForResult.add(TrackPartInSingleCell( cell = startCell, mutableListOf(
+            splittingSegment.startCellLocation, transitionPoints[0])))
+        logger.printLog("making next segment: change start: ${splittingSegment.startCellLocation} to ${transitionPoints[0]}, end: ${splittingSegment.endSegmentLocation} to ${nextSegment.endSegmentLocation}")
+        logger.printLog("make recursion slitting. Next segment = $nextSegment \n")
+        val nextTransitionTo = TransitionManager(cellSize).getTransitionTo( // преверяем на наличие перехода
+            splittingSegment.startCellLocation,
+            splittingSegment.endCellLocation)
+        if (nextTransitionTo != TransitionTo.NONE)
+            splitSegment(
+                startCell = nextCell,
+                splittingSegment = nextSegment,
+                listForResult = listForResult,
+                transitionTo = nextTransitionTo)
         return listForResult
     }
 

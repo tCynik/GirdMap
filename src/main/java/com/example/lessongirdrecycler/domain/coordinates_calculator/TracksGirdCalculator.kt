@@ -86,7 +86,7 @@ class TracksGirdCalculator(
 
         var transitionTo = TransitionManager(cellSize).getTransitionTo( // преверяем на наличие перехода
             splittingSegment.startCellLocation,
-            splittingSegment.endSegmentCellLocation)
+            splittingSegment.endCellLocation)
 
         if (transitionTo == TransitionTo.NONE) listForResult.add(TrackPartInSingleCell(startCell,
             mutableListOf(
@@ -99,10 +99,10 @@ class TracksGirdCalculator(
             val transitionPoints = CellTransitionByEnum(cellSize, logger).getTransitionPoints(
                 transitionTo = transitionTo,
                 startCellLocation = splittingSegment.startCellLocation,
-                endCellLocation = splittingSegment.endSegmentCellLocation)
+                endCellLocation = splittingSegment.endCellLocation)
             val nextSegment = Segment(cellSize = cellSize,
                 startCellLocation = transitionPoints[0],
-                endSegmentCellLocation = splittingSegment.endSegmentCellLocation) // todo: ошибка в логике
+                endCellLocation = splittingSegment.endCellLocation) // todo: ошибка в логике
             // мы переходим в новую ячейку, и для неё у нас те же самые координаты конца?
             // В таком случае рекурсия никогда не закончится
             // типа выходит, нужно пересчитывать координаты конца под новую ячейку?
@@ -132,7 +132,7 @@ class TracksGirdCalculator(
     private fun processingTransition(segmentStartCell: CoordinatesOfCell, currentSegment: Segment): TransitionTo {
         val transitionTo = TransitionManager(cellSize).getTransitionTo( // преверяем на наличие перехода
             currentSegment.startCellLocation,
-            currentSegment.endSegmentCellLocation)
+            currentSegment.endCellLocation)
 
         val nextCellNumber = NextCellNumber().get(
             cellNumber = segmentStartCell,
@@ -140,7 +140,7 @@ class TracksGirdCalculator(
         val transitionPoints = CellTransitionByEnum(cellSize, logger).getTransitionPoints(
             transitionTo = transitionTo,
             startCellLocation = currentSegment.startCellLocation,
-            endCellLocation = currentSegment.endSegmentCellLocation)
+            endCellLocation = currentSegment.endCellLocation)
         Log.i("bugfix: calculator", "transition prev ${transitionPoints[0]} to ${transitionPoints[1]}")
 
         splittedByCellsTrack.addLocation( // end track in current cell

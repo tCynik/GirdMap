@@ -3,7 +3,6 @@ package com.example.lessongirdrecycler.domain.coordinates_calculator
 import com.example.lessongirdrecycler.domain.Logger
 import com.example.lessongirdrecycler.domain.models.cell.CellLocation
 import com.example.lessongirdrecycler.domain.models.cell.CoordinatesOfCell
-import com.example.lessongirdrecycler.domain.models.cell.SplittedByCellsTrack
 import com.example.lessongirdrecycler.domain.models.cell.TrackPartInSingleCell
 import com.example.lessongirdrecycler.domain.models.global.GlobalTrack
 import com.example.lessongirdrecycler.domain.models.global.GlobalTurnPoint
@@ -22,7 +21,7 @@ internal class TrackSplitterTest {
         girdStartY = 0.0,
         coordinateScale = 1,
         logger = logger)
-    val result = mutableListOf<TrackPartInSingleCell>()
+    val expectedResult = mutableListOf<TrackPartInSingleCell>()
 
     @Test
     fun splitStraightToEast() {
@@ -30,23 +29,28 @@ internal class TrackSplitterTest {
             GlobalTurnPoint(0, 50),
             GlobalTurnPoint(500, 50) ))
 
-        result.add(TrackPartInSingleCell(
+        expectedResult.add(TrackPartInSingleCell(
             cell = CoordinatesOfCell(0, 0), mutableListOf(
                 CellLocation(0, 50),
                 CellLocation(100, 50),)))
-        result.add(TrackPartInSingleCell(
+        expectedResult.add(TrackPartInSingleCell(
             cell = CoordinatesOfCell(1, 0), mutableListOf(
                 CellLocation(0, 50),
                 CellLocation(100, 50),)))
-        result.add(TrackPartInSingleCell(
+        expectedResult.add(TrackPartInSingleCell(
             cell = CoordinatesOfCell(2, 0), mutableListOf(
                 CellLocation(0, 50),
                 CellLocation(100, 50),)))
-        result.add(TrackPartInSingleCell(
+        expectedResult.add(TrackPartInSingleCell(
             cell = CoordinatesOfCell(3, 0), mutableListOf(
                 CellLocation(0, 50),
                 CellLocation(100, 50),)))
+        expectedResult.add(TrackPartInSingleCell(
+            cell = CoordinatesOfCell(4, 0), mutableListOf(
+                CellLocation(0, 50),
+                CellLocation(100, 50),)))
 
-        Assert.assertEquals(result, trackSplitter.splitGlobalTrackToCells(testTrack))
+        val actualResult: List<TrackPartInSingleCell> = trackSplitter.splitGlobalTrackToCells(testTrack).cellData
+        Assert.assertEquals(expectedResult, actualResult)
     }
 }

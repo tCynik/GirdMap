@@ -5,25 +5,25 @@ import com.example.lessongirdrecycler.domain.models.cell.CellLocation
 
 class Segment (val cellSize: Int,
                var startCellLocation: CellLocation,
-               val endSegmentCellLocation: CellLocation,) {
+               val endCellLocation: CellLocation,) {
     var endSegmentLocation: CellLocation = CellLocation(0, 0)
     init{
         endSegmentLocation = CellLocation(
-            x = endSegmentCellLocation.x - startCellLocation.x,
-            y = endSegmentCellLocation.y - startCellLocation.y)
+            x = endCellLocation.x - startCellLocation.x,
+            y = endCellLocation.y - startCellLocation.y)
     }
 
     override fun toString(): String {
-        return "start: $startCellLocation, end: $endSegmentLocation"
+        return "start: $startCellLocation, end: $endCellLocation"
     }
 
-    fun getCutted(nextStartLocation: CellLocation): Segment{
-        val deltaX = nextStartLocation.x - startCellLocation.x
-        val deltay = nextStartLocation.y - startCellLocation.y
+    fun getCutted(currentEndLocation: CellLocation, nextStartLocation: CellLocation): Segment{
+        val deltaX = startCellLocation.x - currentEndLocation.x
+        val deltay = startCellLocation.y - currentEndLocation.y
         val nextEnd = CellLocation(
-            x = endSegmentLocation.x + deltaX,
-            y= endSegmentLocation.y + deltay)
-        return Segment(cellSize = cellSize, startCellLocation = nextStartLocation, endSegmentCellLocation = nextEnd)
+            x = endCellLocation.x + deltaX,
+            y= endCellLocation.y + deltay)
+        return Segment(cellSize = cellSize, startCellLocation = nextStartLocation, endCellLocation = nextEnd)
 
     }
 
@@ -127,12 +127,12 @@ class Segment (val cellSize: Int,
         return Segment(
             cellSize = cellSize,
             startCellLocation = startCellLocation,
-            endSegmentCellLocation = endLocation)
+            endCellLocation = endLocation)
     }
 
 
     fun isCellTransfer(): Boolean {
-        return (endSegmentCellLocation.x > cellSize || endSegmentCellLocation.y > cellSize)
+        return (endCellLocation.x > cellSize || endCellLocation.y > cellSize)
     }
 
 //    private fun currentCellEnd(): CellLocation{
