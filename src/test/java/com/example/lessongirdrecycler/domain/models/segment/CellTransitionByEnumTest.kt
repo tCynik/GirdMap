@@ -16,6 +16,21 @@ internal class CellTransitionByEnumTest {
     val cellTransitionCalculator = CellTransitionByEnum(cellSize, logger)
     val startCellLocation = CellLocation(50, 50)
 
+    // no transitions
+    @Test
+    fun noTransitionSW () {
+        val startLocation = CellLocation(100, 0)
+        val endLocation = CellLocation(-100, 200)
+        val transitionLocations = cellTransitionCalculator.getTransitionPoints(
+            transitionTo = TransitionTo.SW,
+            startCellLocation = startLocation,
+            endCellLocation = endLocation)
+
+        val currentExpected = CellLocation(0, 100)
+        val nextExpected = CellLocation(100, 0)
+        Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
+    }
+
     // directly one axis transitions
     @Test
     fun transitionNorth () {

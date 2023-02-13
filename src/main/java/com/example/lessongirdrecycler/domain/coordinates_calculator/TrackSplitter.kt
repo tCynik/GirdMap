@@ -132,13 +132,16 @@ class TrackSplitter (
     }
 
     private fun cellCoordinates(globalCoordinates: GlobalTurnPoint): CoordinatesOfCell {
+        val localCoordinates = globalCoordinatesToLocal(globalCoordinates)
         val coordinatesOfCell = CoordinatesOfCell(
-            // todo: тут будет необходимо учесть, что мы берем координаты ячеек из глобальных координат
-            // брать из местных?
-            x = globalCoordinates.longitude/cellSize.toInt(),
-            y = globalCoordinates.latitude/cellSize.toInt()
+            x = (localCoordinates.x/(cellSize+1)).toInt(),
+            y = (localCoordinates.y/(cellSize+1)).toInt()
         )
         return coordinatesOfCell
+    }
+
+    private fun globalCoordinatesToLocal(globalCoordinates: GlobalTurnPoint): CellLocation{ // вынести в отдельный класс (в видеинтерфейса?)
+        return CellLocation(globalCoordinates.longitude, globalCoordinates.latitude)
     }
     private fun GlobalTurnPoint.print(point: GlobalTurnPoint) {
         logger.printLog( "next TP is: ${point.longitude}-${point.latitude}")

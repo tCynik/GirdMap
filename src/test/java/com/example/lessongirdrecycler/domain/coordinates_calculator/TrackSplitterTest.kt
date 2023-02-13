@@ -53,4 +53,60 @@ internal class TrackSplitterTest {
         val actualResult: List<TrackPartInSingleCell> = trackSplitter.splitGlobalTrackToCells(testTrack).cellData
         Assert.assertEquals(expectedResult, actualResult)
     }
+
+    @Test
+    fun split45tToSW() {
+        val testTrack = GlobalTrack(id = 1, turnPoints = mutableListOf(
+            GlobalTurnPoint(100, 0),
+            GlobalTurnPoint(-400, 500) ))
+
+        expectedResult.add(TrackPartInSingleCell(
+            cell = CoordinatesOfCell(0, 0), mutableListOf(
+                CellLocation(100, 0),
+                CellLocation(0, 100),)))
+        expectedResult.add(TrackPartInSingleCell(
+            cell = CoordinatesOfCell(-1, 1), mutableListOf(
+                CellLocation(100, 0),
+                CellLocation(0, 100),)))
+        expectedResult.add(TrackPartInSingleCell(
+            cell = CoordinatesOfCell(-2, 2), mutableListOf(
+                CellLocation(100, 0),
+                CellLocation(0, 100),)))
+        expectedResult.add(TrackPartInSingleCell(
+            cell = CoordinatesOfCell(-3, 3), mutableListOf(
+                CellLocation(100, 0),
+                CellLocation(0, 100),)))
+        expectedResult.add(TrackPartInSingleCell(
+            cell = CoordinatesOfCell(-4, 4), mutableListOf(
+                CellLocation(100, 0),
+                CellLocation(0, 100),)))
+
+        val actualResult: List<TrackPartInSingleCell> = trackSplitter.splitGlobalTrackToCells(testTrack).cellData
+        Assert.assertEquals(expectedResult, actualResult)
+    }
+
+    @Test
+    fun split45tToSWSrossEdge() {
+        val testTrack = GlobalTrack(id = 1, turnPoints = mutableListOf(
+            GlobalTurnPoint(100, 50),
+            GlobalTurnPoint(-50, 200) ))
+
+        expectedResult.add(TrackPartInSingleCell(
+            cell = CoordinatesOfCell(0, 0), mutableListOf(
+                CellLocation(100, 50),
+                CellLocation(50, 100),)))
+        expectedResult.add(TrackPartInSingleCell(
+            cell = CoordinatesOfCell(0, 1), mutableListOf(
+                CellLocation(50, 0),
+                CellLocation(0, 50),)))
+        expectedResult.add(TrackPartInSingleCell(
+            cell = CoordinatesOfCell(-1, 1), mutableListOf(
+                CellLocation(100, 50),
+                CellLocation(50, 100),)))
+
+        val actualResult: List<TrackPartInSingleCell> = trackSplitter.splitGlobalTrackToCells(testTrack).cellData
+        Assert.assertEquals(expectedResult, actualResult)
+    }
+
+    // next is to test cross-edge calculating
 }
