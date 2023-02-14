@@ -38,16 +38,16 @@ class TrackSplitter (
         logger.printLog("first time cell = $currentCell")
 
         val turnPoints = track.turnPoints
-        turnPoints.forEach{point -> point.print(point)}
         var listForResult = mutableListOf<TrackPartInSingleCell>()
-        logger.printLog("starting to split the track, size of track = ${turnPoints.size}")
+        logger.printLog("starting to split the track, size of track = ${turnPoints.size}. Turnpoints mapped to local coordinates:")
+        turnPoints.forEach{point -> point.print(point)}
 
         var iter = 1
         while (iter < turnPoints.size) { // перебор точек трека
             val currentPoint = turnPoints[iter -1]
             val nextPoint = turnPoints[iter]
             currentCell = cellCoordinates(currentPoint)
-            logger.printLog("current iterCell = $currentCell")
+            logger.printLog("cell of the current iteration: $currentCell")
 
             val currentSegment = Segment(
                 cellSize = cellSize,
@@ -117,6 +117,8 @@ class TrackSplitter (
         val nextSegment = splittingSegment.getCutted(transitionPoints[0], transitionPoints[1])
         listForResult.add(TrackPartInSingleCell( cell = startCell, mutableListOf(
             splittingSegment.startCellLocation, transitionPoints[0])))
+        
+        // в тесте должно получиться новые кооринаты окончания: -100:-100  , получается -50:100
         logger.printLog("making next segment: change start: ${splittingSegment.startCellLocation} to ${transitionPoints[0]}, end: ${splittingSegment.endSegmentLocation} to ${nextSegment.endSegmentLocation}")
         logger.printLog("make recursion slitting. Next segment = $nextSegment \n")
         val nextTransitionTo = TransitionManager(cellSize).getTransitionTo( // преверяем на наличие перехода
@@ -144,7 +146,7 @@ class TrackSplitter (
         return CellLocation(globalCoordinates.longitude, globalCoordinates.latitude)
     }
     private fun GlobalTurnPoint.print(point: GlobalTurnPoint) {
-        logger.printLog( "next TP is: ${point.longitude}-${point.latitude}")
+        logger.printLog( "mapped to local next TP coordinates is: ${point.longitude}-${point.latitude}")
     }
 
     private fun coordinatesInsideCellByGlobal (globalCoordinates: GlobalTurnPoint, coordinatesOfCell: CoordinatesOfCell): CellLocation {

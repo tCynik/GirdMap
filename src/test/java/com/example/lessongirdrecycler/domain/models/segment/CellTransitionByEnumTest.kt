@@ -138,6 +138,20 @@ internal class CellTransitionByEnumTest {
         val nextExpected = CellLocation(25, 0)
         Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
     }
+    @Test
+    fun transitionSW45CrossBottom3Cells() {
+        val startLocation = CellLocation(100, 50)
+        val endLocation = CellLocation(-50, 200)
+        val transitionLocations = cellTransitionCalculator.getTransitionPoints(
+            transitionTo = TransitionTo.SW,
+            startCellLocation = startLocation,
+            endCellLocation = endLocation)
+
+        val currentExpected = CellLocation(50, 100)
+        val nextExpected = CellLocation(50, 0)
+        Assert.assertEquals(listOf(currentExpected, nextExpected), transitionLocations)
+    }
+
 
     //NW
     @Test

@@ -27,7 +27,7 @@ class TracksGirdCalculator(
     ) {
     companion object logger: Logger{
         override fun printLog(logMessage: String) {
-            Log.i("bugfix: Calculator", logMessage)
+            //Log.i("bugfix: Calculator", logMessage)
         }
     }
 

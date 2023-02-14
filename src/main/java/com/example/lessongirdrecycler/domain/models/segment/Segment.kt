@@ -24,7 +24,6 @@ class Segment (val cellSize: Int,
             x = endCellLocation.x + deltaX,
             y= endCellLocation.y + deltay)
         return Segment(cellSize = cellSize, startCellLocation = nextStartLocation, endCellLocation = nextEnd)
-
     }
 
     fun cutOne(nextStartLocation: CellLocation, transitionTo: TransitionTo) { // todo: delete?

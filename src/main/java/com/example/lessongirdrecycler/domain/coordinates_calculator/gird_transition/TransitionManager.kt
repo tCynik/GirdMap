@@ -9,10 +9,10 @@ class TransitionManager(private val cellSize: Int) {
         val relativeYFromTopStart = coordinatesInCell.y + relativeCoordinatesNext.y
         var transitionTo = TransitionTo.NONE
 
-        if (relativeXFromTopStart < 0) transitionTo = TransitionTo.WEST
+        if (relativeCoordinatesNext.x < 0) transitionTo = TransitionTo.WEST
         else if (relativeXFromTopStart > cellSize) transitionTo = TransitionTo.EAST
 
-        if (relativeYFromTopStart < 0)
+        if (relativeCoordinatesNext.y < 0)
             transitionTo = when (transitionTo) {
                 TransitionTo.WEST -> TransitionTo.NW
                 TransitionTo.EAST -> TransitionTo.NE

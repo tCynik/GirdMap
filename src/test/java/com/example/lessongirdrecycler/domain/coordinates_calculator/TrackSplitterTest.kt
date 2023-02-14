@@ -86,7 +86,7 @@ internal class TrackSplitterTest {
     }
 
     @Test
-    fun split45tToSWSrossEdge() {
+    fun split45tToSWCrossEdge() {
         val testTrack = GlobalTrack(id = 1, turnPoints = mutableListOf(
             GlobalTurnPoint(100, 50),
             GlobalTurnPoint(-50, 200) ))
